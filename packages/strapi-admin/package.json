@@ -125,5 +125,5 @@
   "devDependencies": {
     "webpack-bundle-analyzer": "4.4.0"
   },
-  "gitHead": "57095241bb8bc011c97ecbc8c7274b674b01cd0f"
+  "gitHead": "48e43a6f7cdbc5f7ce9e800046af6fb5d26763ee"
 }
