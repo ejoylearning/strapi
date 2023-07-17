@@ -1,6 +1,6 @@
 {
-  "name": "strapi-hook-ejs",
-  "version": "3.3.3",
+  "name": "@toanz/strapi-hook-ejs",
+  "version": "3.12.4",
   "description": "EJS hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -39,7 +39,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
