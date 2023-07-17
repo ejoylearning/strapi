@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('@akemona-org/strapi-utils');
+const { yup, formatYupErrors } = require('@toanz/strapi-utils');
 
 const createModelConfigurationSchema = require('./model-configuration');
 

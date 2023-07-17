@@ -7,7 +7,7 @@ import {
   useGlobalContext,
   useQuery,
   LoadingIndicator,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 
 import { useAppContext } from '../../../hooks';
 import { getTrad, getFileModelTimestamps } from '../../../utils';

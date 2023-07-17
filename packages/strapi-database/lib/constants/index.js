@@ -1,6 +1,6 @@
 'use strict';
 
-const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@toanz/strapi-utils');
 
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } =
   contentTypesUtils.constants;

@@ -9,7 +9,7 @@ import {
   DropdownIndicator,
   BaselineAlignment,
   selectStyles,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { stringify } from 'qs';
 import { getTrad } from '../../utils';

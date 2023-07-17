@@ -7,7 +7,7 @@ import {
   ErrorFallback,
   LoadingIndicatorPage,
   CheckPagePermissions,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';

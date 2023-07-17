@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { SelectWrapper, SelectNav } from '@akemona-org/strapi-helper-plugin';
+import { SelectWrapper, SelectNav } from '@toanz/strapi-helper-plugin';
 import { ErrorMessage } from '@buffetjs/styles';
 import AllowedTypesSelect from '../AllowedTypesSelect';
 import ComponentSelect from '../ComponentSelect';

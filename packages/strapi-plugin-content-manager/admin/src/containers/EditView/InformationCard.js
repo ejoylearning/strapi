@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl';
 import {
   InjectionZone,
   useContentManagerEditViewDataManager,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { SubWrapper, StatusWrapper } from './components';
 import pluginId from '../../pluginId';
 import { getTrad } from '../../utils';

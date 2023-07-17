@@ -2,7 +2,7 @@
 
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
-const { getAbsoluteAdminUrl } = require('@akemona-org/strapi-utils');
+const { getAbsoluteAdminUrl } = require('@toanz/strapi-utils');
 
 /**
  * hashes a password

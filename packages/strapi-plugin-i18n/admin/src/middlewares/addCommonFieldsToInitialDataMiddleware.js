@@ -6,7 +6,7 @@ import {
   request,
   formatComponentData,
   contentManagementUtilRemoveFieldsFromData,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import pluginId from '../pluginId';
 
 const addCommonFieldsToInitialDataMiddleware =

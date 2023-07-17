@@ -2,7 +2,7 @@
 
 const {
   policy: { createPolicyFactory },
-} = require('@akemona-org/strapi-utils');
+} = require('@toanz/strapi-utils');
 const { validateHasPermissionsInput } = require('../../validation/policies/hasPermissions');
 
 module.exports = createPolicyFactory(

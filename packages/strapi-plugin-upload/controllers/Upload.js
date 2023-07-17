@@ -6,7 +6,7 @@
  */
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('@akemona-org/strapi-utils');
+const { sanitizeEntity } = require('@toanz/strapi-utils');
 const apiUploadController = require('./upload/api');
 const adminUploadController = require('./upload/admin');
 

@@ -10,7 +10,7 @@ import {
   useUser,
   findMatchingPermissions,
   useGlobalContext,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 import { formatFiltersToQuery, getTrad } from '../../utils';

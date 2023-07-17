@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@toanz/strapi-utils');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 

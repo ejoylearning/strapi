@@ -11,7 +11,7 @@ import {
   useGlobalContext,
   useQuery,
   useUserPermissions,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';

@@ -9,7 +9,7 @@ const {
     constants: { DP_PUB_STATES },
     hasDraftAndPublish,
   },
-} = require('@akemona-org/strapi-utils');
+} = require('@toanz/strapi-utils');
 const utils = require('./utils')();
 const populateQueries = require('./utils/populate-queries');
 

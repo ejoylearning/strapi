@@ -1,7 +1,7 @@
 'use strict';
 
 const commander = require('commander');
-const generateNewApp = require('@akemona-org/strapi-generate-new');
+const generateNewApp = require('@toanz/strapi-generate-new');
 const promptUser = require('./utils/prompt-user');
 // eslint-disable-next-line import/extensions
 const packageJson = require('./package.json');

@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const { yup } = require('@akemona-org/strapi-utils');
+const { yup } = require('@toanz/strapi-utils');
 
 /**
  * Utility function to compose validators

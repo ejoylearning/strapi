@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-provider-email-mailgun",
+  "name": "@toanz/strapi-provider-email-mailgun",
   "publishConfig": {
     "access": "public"
   },
@@ -16,7 +16,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "mailgun-js": "0.22.0"
   },
   "strapi": {

@@ -15,7 +15,7 @@ import {
   getYupInnerErrors,
   BackHeader,
   LoadingIndicatorPage,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { useModels } from '../../../hooks';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';

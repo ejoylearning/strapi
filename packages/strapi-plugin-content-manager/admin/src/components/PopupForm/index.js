@@ -7,7 +7,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalForm,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
 import { AttributeIcon, Button } from '@buffetjs/core';

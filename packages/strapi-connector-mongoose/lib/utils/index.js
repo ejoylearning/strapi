@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const Mongoose = require('mongoose');
-const { parseType } = require('@akemona-org/strapi-utils');
+const { parseType } = require('@toanz/strapi-utils');
 
 /**
  * Module dependencies

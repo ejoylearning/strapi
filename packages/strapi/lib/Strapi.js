@@ -16,8 +16,8 @@ const {
   models,
   getAbsoluteAdminUrl,
   getAbsoluteServerUrl,
-} = require('@akemona-org/strapi-utils');
-const { createDatabaseManager } = require('@akemona-org/strapi-database');
+} = require('@toanz/strapi-utils');
+const { createDatabaseManager } = require('@toanz/strapi-database');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');

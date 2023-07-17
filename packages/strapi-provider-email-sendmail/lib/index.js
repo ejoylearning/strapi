@@ -1,7 +1,7 @@
 'use strict';
 
 const sendmailFactory = require('sendmail');
-const { removeUndefined } = require('@akemona-org/strapi-utils');
+const { removeUndefined } = require('@toanz/strapi-utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {

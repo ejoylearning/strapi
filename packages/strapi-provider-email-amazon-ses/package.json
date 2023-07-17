@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-provider-email-amazon-ses",
+  "name": "@toanz/strapi-provider-email-amazon-ses",
   "publishConfig": {
     "access": "public"
   },
@@ -17,7 +17,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "node-ses": "^3.0.3"
   },
   "author": {

@@ -10,7 +10,7 @@ const _ = require('lodash');
 // Utils
 const {
   models: { getValuePrimaryKey },
-} = require('@akemona-org/strapi-utils');
+} = require('@toanz/strapi-utils');
 
 const transformToArrayID = (array) => {
   if (_.isArray(array)) {

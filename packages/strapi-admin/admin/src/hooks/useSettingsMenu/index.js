@@ -1,5 +1,5 @@
 import { useContext, useEffect, useReducer } from 'react';
-import { useGlobalContext, hasPermissions, UserContext } from '@akemona-org/strapi-helper-plugin';
+import { useGlobalContext, hasPermissions, UserContext } from '@toanz/strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
 import init from './init';

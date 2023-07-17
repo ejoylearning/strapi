@@ -6,7 +6,7 @@ import {
   useUserPermissions,
   LoadingIndicatorPage,
   PopUpWarning,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';

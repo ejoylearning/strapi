@@ -2,7 +2,7 @@
 
 const {
   contentTypes: { hasDraftAndPublish },
-} = require('@akemona-org/strapi-utils');
+} = require('@toanz/strapi-utils');
 
 module.exports = (ctx, next) => {
   const {

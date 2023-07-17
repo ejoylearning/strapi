@@ -1,7 +1,7 @@
 'use strict';
 
 const sendgrid = require('@sendgrid/mail');
-const { removeUndefined } = require('@akemona-org/strapi-utils');
+const { removeUndefined } = require('@toanz/strapi-utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {

@@ -1,6 +1,6 @@
 'use strict';
 
-const { setCreatorFields, sanitizeEntity } = require('@akemona-org/strapi-utils');
+const { setCreatorFields, sanitizeEntity } = require('@toanz/strapi-utils');
 const { pick } = require('lodash/fp');
 const { getService } = require('../utils');
 const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../validation/locales');

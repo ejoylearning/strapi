@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PageFooter } from '@akemona-org/strapi-helper-plugin';
+import { PageFooter } from '@toanz/strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
 import Wrapper from './Wrapper';
 

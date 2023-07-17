@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-provider-upload-local",
+  "name": "@toanz/strapi-provider-upload-local",
   "publishConfig": {
     "access": "public"
   },
@@ -34,7 +34,7 @@
     "url": "git://github.com/akemona/strapi.git"
   },
   "peerDependencies": {
-    "@akemona-org/strapi-plugin-upload": "^3.1.6"
+    "@toanz/strapi-plugin-upload": "^3.1.6"
   },
   "bugs": {
     "url": "https://github.com/akemona/strapi/issues"

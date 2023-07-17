@@ -1,7 +1,7 @@
 'use strict';
 
 const { eq } = require('lodash/fp');
-const { hooks } = require('@akemona-org/strapi-utils');
+const { hooks } = require('@toanz/strapi-utils');
 
 /**
  * @typedef SectionOptions

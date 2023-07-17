@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-plugin-sentry",
+  "name": "@toanz/strapi-plugin-sentry",
   "version": "3.12.4",
   "publishConfig": {
     "access": "public"

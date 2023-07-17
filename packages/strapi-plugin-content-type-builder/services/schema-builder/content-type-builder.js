@@ -4,7 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { nameToSlug, nameToCollectionName } = require('@akemona-org/strapi-utils');
+const { nameToSlug, nameToCollectionName } = require('@toanz/strapi-utils');
 const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
 const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');

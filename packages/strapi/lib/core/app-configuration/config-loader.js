@@ -2,7 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const { templateConfiguration, env } = require('@akemona-org/strapi-utils');
+const { templateConfiguration, env } = require('@toanz/strapi-utils');
 
 module.exports = (dir) => {
   if (!fs.existsSync(dir)) return {};

@@ -6,7 +6,7 @@ import {
   CheckPermissions,
   LabelIconWrapper,
   prefixFileUrlWithBackendUrl,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, formatFileForEditing } from '../../utils';
 import CardControl from '../CardControl';

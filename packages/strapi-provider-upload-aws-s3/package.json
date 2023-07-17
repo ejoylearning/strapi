@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-provider-upload-aws-s3",
+  "name": "@toanz/strapi-provider-upload-aws-s3",
   "publishConfig": {
     "access": "public"
   },

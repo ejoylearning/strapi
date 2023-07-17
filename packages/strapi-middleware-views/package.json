@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-middleware-views",
+  "name": "@toanz/strapi-middleware-views",
   "publishConfig": {
     "access": "public"
   },

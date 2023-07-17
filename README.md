@@ -15,7 +15,7 @@ Install Strapi with this **Quickstart** command to create a Strapi project insta
 - (Use **yarn** to install the Strapi project (recommended). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
 
 ```bash
-yarn create @akemona-org/strapi-app my-project --quickstart
+yarn create @toanz/strapi-app my-project --quickstart
 ```
 
 **or**
@@ -23,7 +23,7 @@ yarn create @akemona-org/strapi-app my-project --quickstart
 - (Use npm/npx to install the Strapi project.)
 
 ```bash
-npx @akemona-org/create-strapi-app my-project --quickstart
+npx @toanz/create-strapi-app my-project --quickstart
 ```
 
 This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload). The **Quickstart** command installs Strapi using a **SQLite** database which is used for prototyping in development.

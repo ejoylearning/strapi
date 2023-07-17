@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-provider-email-sendmail",
+  "name": "@toanz/strapi-provider-email-sendmail",
   "publishConfig": {
     "access": "public"
   },
@@ -15,7 +15,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "sendmail": "^1.6.1"
   },
   "strapi": {

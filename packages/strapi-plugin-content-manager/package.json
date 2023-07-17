@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-plugin-content-manager",
+  "name": "@toanz/strapi-plugin-content-manager",
   "publishConfig": {
     "access": "public"
   },
@@ -12,8 +12,8 @@
     "required": true
   },
   "dependencies": {
-    "@akemona-org/strapi-helper-plugin": "3.12.4",
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-helper-plugin": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "@buffetjs/core": "3.3.8",
     "@buffetjs/custom": "3.3.8",
     "@buffetjs/hooks": "3.3.8",

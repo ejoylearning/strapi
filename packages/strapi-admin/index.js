@@ -156,7 +156,7 @@ async function copyPlugin(name, dest) {
 }
 
 async function copyAdmin(dest) {
-  const adminPath = getPkgPath('@akemona-org/strapi-admin');
+  const adminPath = getPkgPath('@toanz/strapi-admin');
 
   // TODO copy ee folders for plugins
   // disable ee copy
@@ -184,7 +184,7 @@ async function createCacheDir(dir) {
 
   const pluginsToCopy = Object.keys(pkgJSON.dependencies).filter(
     (dep) =>
-      dep.startsWith('@akemona-org/strapi-plugin') &&
+      dep.startsWith('@toanz/strapi-plugin') &&
       fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
   );
 
@@ -291,7 +291,7 @@ async function watchFiles(dir, ignoreFiles = []) {
 
   const appPlugins = Object.keys(pkgJSON.dependencies).filter(
     (dep) =>
-      dep.startsWith('@akemona-org/strapi-plugin') &&
+      dep.startsWith('@toanz/strapi-plugin') &&
       fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
   );
   const pluginsToWatch = appPlugins.map((plugin) =>
@@ -316,8 +316,8 @@ async function watchFiles(dir, ignoreFiles = []) {
     const pluginName = isExtension ? filePath.replace(extensionsPath, '').split(path.sep)[1] : '';
 
     const packageName = isExtension
-      ? `@akemona-org/strapi-plugin-${pluginName}`
-      : '@akemona-org/strapi-admin';
+      ? `@toanz/strapi-plugin-${pluginName}`
+      : '@toanz/strapi-admin';
 
     const targetPath = isExtension
       ? path.normalize(filePath.split(extensionsPath)[1].replace(pluginName, ''))

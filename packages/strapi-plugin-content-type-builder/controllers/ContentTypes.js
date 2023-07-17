@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-// const { hasDraftAndPublish } = require('@akemona-org/strapi-utils').contentTypes;
+// const { hasDraftAndPublish } = require('@toanz/strapi-utils').contentTypes;
 
 const {
   validateContentTypeInput,

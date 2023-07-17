@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup } = require('@akemona-org/strapi-utils');
+const { yup } = require('@toanz/strapi-utils');
 const {
   isListable,
   hasRelationAttribute,

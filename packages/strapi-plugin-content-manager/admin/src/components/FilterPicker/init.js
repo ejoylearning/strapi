@@ -1,5 +1,5 @@
 import { fromJS } from 'immutable';
-import { getFilterType } from '@akemona-org/strapi-helper-plugin';
+import { getFilterType } from '@toanz/strapi-helper-plugin';
 import { get } from 'lodash';
 
 function init(initialState, { name, type, options }) {

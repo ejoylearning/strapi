@@ -6,8 +6,8 @@
 const _ = require('lodash');
 const { omit } = require('lodash/fp');
 const pmap = require('p-map');
-const { convertRestQueryParams, buildQuery, escapeQuery } = require('@akemona-org/strapi-utils');
-const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
+const { convertRestQueryParams, buildQuery, escapeQuery } = require('@toanz/strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@toanz/strapi-utils');
 const { singular } = require('pluralize');
 const { handleDatabaseError } = require('./utils/errors');
 

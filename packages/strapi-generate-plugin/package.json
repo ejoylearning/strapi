@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-generate-plugin",
+  "name": "@toanz/strapi-generate-plugin",
   "version": "3.12.4",
   "publishConfig": {
     "access": "public"
@@ -16,7 +16,7 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "fs-extra": "^9.1.0",
     "lodash": "4.17.21"
   },

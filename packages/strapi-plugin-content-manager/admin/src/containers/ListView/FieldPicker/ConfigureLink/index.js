@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { LayoutIcon, useGlobalContext } from '@akemona-org/strapi-helper-plugin';
+import { LayoutIcon, useGlobalContext } from '@toanz/strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import Link from './StyledLink';
 import Wrapper from './Wrapper';

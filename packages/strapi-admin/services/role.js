@@ -17,7 +17,7 @@ const {
   generateTimestampCode,
   stringIncludes,
   hooks: { createAsyncSeriesWaterfallHook },
-} = require('@akemona-org/strapi-utils');
+} = require('@toanz/strapi-utils');
 const permissionDomain = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
 const { getService } = require('../utils');

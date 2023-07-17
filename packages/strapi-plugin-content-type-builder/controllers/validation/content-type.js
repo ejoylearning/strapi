@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const yup = require('yup');
-const { formatYupErrors, nameToSlug } = require('@akemona-org/strapi-utils');
+const { formatYupErrors, nameToSlug } = require('@toanz/strapi-utils');
 const pluralize = require('pluralize');
 
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');

@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import {
   useContentManagerEditViewDataManager,
   useQueryParams,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import CMEditViewLocalePicker from '../CMEditViewLocalePicker';

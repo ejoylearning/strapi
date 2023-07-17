@@ -1,7 +1,7 @@
 'use strict';
 
 const { assoc, has, prop, omit } = require('lodash/fp');
-const strapiUtils = require('@akemona-org/strapi-utils');
+const strapiUtils = require('@toanz/strapi-utils');
 
 const { sanitizeEntity } = strapiUtils;
 const { hasDraftAndPublish } = strapiUtils.contentTypes;

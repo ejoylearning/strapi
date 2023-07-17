@@ -8,7 +8,7 @@
 const reportback = require('reportback')();
 
 // Logger.
-const logger = require('@akemona-org/strapi-utils').logger;
+const logger = require('@toanz/strapi-utils').logger;
 
 // Local dependencies.
 const generate = require('./generate');

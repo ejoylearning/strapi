@@ -1,6 +1,6 @@
 'use strict';
 
-const { providerFactory } = require('@akemona-org/strapi-utils');
+const { providerFactory } = require('@toanz/strapi-utils');
 const domain = require('./');
 
 /**

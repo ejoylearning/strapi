@@ -7,5 +7,5 @@
  */
 
 module.exports = function (...args) {
-  return require('@akemona-org/strapi-generate-new')(...args);
+  return require('@toanz/strapi-generate-new')(...args);
 };

@@ -9,7 +9,7 @@ import {
   PopUpWarning,
   request,
   useGlobalContext,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 
 import permissions from '../../../permissions';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';

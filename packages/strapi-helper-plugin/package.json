@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-helper-plugin",
+  "name": "@toanz/strapi-helper-plugin",
   "publishConfig": {
     "access": "public"
   },

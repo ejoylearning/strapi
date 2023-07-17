@@ -1,7 +1,7 @@
-import { hasPermissions } from '@akemona-org/strapi-helper-plugin';
+import { hasPermissions } from '@toanz/strapi-helper-plugin';
 import getGeneralLinks from '../getGeneralLinks';
 
-jest.mock('@akemona-org/strapi-helper-plugin');
+jest.mock('@toanz/strapi-helper-plugin');
 
 describe('getGeneralLinks', () => {
   it('resolves valid general links from real data', async () => {

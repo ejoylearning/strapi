@@ -1,8 +1,8 @@
 'use strict';
 
 const { prop, assoc } = require('lodash/fp');
-const { MANY_RELATIONS } = require('@akemona-org/strapi-utils').relations.constants;
-const { isVisibleAttribute } = require('@akemona-org/strapi-utils').contentTypes;
+const { MANY_RELATIONS } = require('@toanz/strapi-utils').relations.constants;
+const { isVisibleAttribute } = require('@toanz/strapi-utils').contentTypes;
 
 const createRelationsCountsQuery = ({ model, fn, connectorQuery }) => {
   // fetch counter map

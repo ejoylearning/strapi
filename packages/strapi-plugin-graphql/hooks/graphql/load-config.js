@@ -10,7 +10,7 @@ const loadPluginsGraphqlConfig = async (installedPlugins) => {
   const root = {};
 
   for (let pluginName of installedPlugins) {
-    const pluginDir = loadUtils.findPackagePath(`@akemona-org/strapi-plugin-${pluginName}`);
+    const pluginDir = loadUtils.findPackagePath(`@toanz/strapi-plugin-${pluginName}`);
 
     const result = await loadUtils.loadFiles(pluginDir, 'config/*.graphql?(.js)');
 

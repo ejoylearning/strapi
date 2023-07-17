@@ -6,7 +6,7 @@ const Configstore = require('configstore');
 const semver = require('semver');
 const boxen = require('boxen');
 const chalk = require('chalk');
-const { env } = require('@akemona-org/strapi-utils');
+const { env } = require('@toanz/strapi-utils');
 
 const pkg = require('../../../package');
 

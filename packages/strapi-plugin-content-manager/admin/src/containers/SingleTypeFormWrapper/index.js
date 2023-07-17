@@ -6,7 +6,7 @@ import {
   useGlobalContext,
   formatComponentData,
   useQueryParams,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';

@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-connector-mongoose",
+  "name": "@toanz/strapi-connector-mongoose",
   "publishConfig": {
     "access": "public"
   },
@@ -18,7 +18,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "lodash": "4.17.21",
     "mongoose": "7.0.3",
     "mongoose-float": "1.0.4",

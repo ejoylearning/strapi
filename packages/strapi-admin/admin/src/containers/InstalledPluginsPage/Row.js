@@ -6,7 +6,7 @@ import {
   useGlobalContext,
   PopUpWarning,
   CheckPermissions,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import adminPermissions from '../../permissions';

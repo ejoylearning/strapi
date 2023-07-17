@@ -8,7 +8,7 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
-const { convertRestQueryParams, buildQuery } = require('@akemona-org/strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('@toanz/strapi-utils');
 
 const { buildQuery: buildQueryResolver } = require('./resolvers-builder');
 const { convertToParams, convertToQuery, nonRequired } = require('./utils');

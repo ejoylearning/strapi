@@ -18,7 +18,7 @@ import {
   useUserPermissions,
   LoadingIndicatorPage,
   EmptyState,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { ListRow } from '../../../components/Webhooks';

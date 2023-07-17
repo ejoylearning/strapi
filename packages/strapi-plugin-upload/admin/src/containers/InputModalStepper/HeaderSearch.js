@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { HeaderSearch as BaseHeaderSearch } from '@akemona-org/strapi-helper-plugin';
+import { HeaderSearch as BaseHeaderSearch } from '@toanz/strapi-helper-plugin';
 
 const HeaderSearch = styled(BaseHeaderSearch)`
   position: relative;

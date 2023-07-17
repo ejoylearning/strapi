@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-connector-bookshelf",
+  "name": "@toanz/strapi-connector-bookshelf",
   "publishConfig": {
     "access": "public"
   },
@@ -19,7 +19,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "bookshelf": "1.2.0",
     "date-fns": "^2.19.0",
     "inquirer": "^6.3.1",

@@ -6,7 +6,7 @@ import {
   ModalFooter,
   ModalHeader,
   useGlobalContext,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import stepper from './stepper';
 
 const ModalForm = ({ isOpen, onClosed, onToggle }) => {

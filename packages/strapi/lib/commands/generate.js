@@ -8,10 +8,10 @@
 const path = require('path');
 
 // Master of ceremonies for generators.
-const generate = require('@akemona-org/strapi-generate');
+const generate = require('@toanz/strapi-generate');
 
 // Logger.
-const { logger } = require('@akemona-org/strapi-utils');
+const { logger } = require('@toanz/strapi-utils');
 
 // Local Strapi dependencies.
 // eslint-disable-next-line import/extensions

@@ -10,7 +10,7 @@ import {
   BaselineAlignment,
   selectStyles,
   DropdownIndicator,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { useFormikContext } from 'formik';
 import { getTrad } from '../../utils';
 

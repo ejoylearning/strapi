@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Checkbox, Text } from '@buffetjs/core';
-import { ModalConfirm } from '@akemona-org/strapi-helper-plugin';
+import { ModalConfirm } from '@toanz/strapi-helper-plugin';
 import { getTrad } from '../../utils';
 import Wrapper from './Wrapper';
 

@@ -13,7 +13,7 @@ import {
   selectStyles,
   useContentManagerEditViewDataManager,
   request,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { getTrad } from '../../utils';
 import { cleanData, generateOptions } from './utils';
 

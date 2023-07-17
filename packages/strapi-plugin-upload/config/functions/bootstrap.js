@@ -40,7 +40,7 @@ const wrapFunctionForErrors =
 
 const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
   try {
-    const providerInstance = require(`@akemona-org/strapi-provider-upload-${provider}`).init(
+    const providerInstance = require(`@toanz/strapi-provider-upload-${provider}`).init(
       providerOptions
     );
 
@@ -56,7 +56,7 @@ const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
   } catch (err) {
     strapi.log.error(err);
     throw new Error(
-      `The provider package isn't installed. Please run \`npm install @akemona-org/strapi-provider-upload-${provider}\``
+      `The provider package isn't installed. Please run \`npm install @toanz/strapi-provider-upload-${provider}\``
     );
   }
 };

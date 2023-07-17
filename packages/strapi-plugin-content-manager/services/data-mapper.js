@@ -2,8 +2,8 @@
 
 const { upperFirst, has, prop, pick, getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
-const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
-const { isMediaAttribute } = require('@akemona-org/strapi-utils').contentTypes;
+const { contentTypes: contentTypesUtils } = require('@toanz/strapi-utils');
+const { isMediaAttribute } = require('@toanz/strapi-utils').contentTypes;
 
 const dtoFields = [
   'uid',

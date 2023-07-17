@@ -4,7 +4,7 @@
 const rimraf = require('rimraf');
 
 // Logger.
-const logger = require('@akemona-org/strapi-utils').logger;
+const logger = require('@toanz/strapi-utils').logger;
 
 module.exports = (scope, success, error) => {
   const Redis = require(`ioredis`);

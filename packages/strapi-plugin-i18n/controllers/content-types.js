@@ -1,7 +1,7 @@
 'use strict';
 
 const { pick, uniq, prop, getOr, flatten, pipe, map } = require('lodash/fp');
-const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@toanz/strapi-utils');
 const { getService } = require('../utils');
 const { validateGetNonLocalizedAttributesInput } = require('../validation/content-types');
 

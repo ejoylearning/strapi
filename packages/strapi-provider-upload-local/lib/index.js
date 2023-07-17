@@ -7,7 +7,7 @@
 // Public node modules.
 const fs = require('fs');
 const path = require('path');
-const { errors } = require('@akemona-org/strapi-plugin-upload');
+const { errors } = require('@toanz/strapi-plugin-upload');
 
 module.exports = {
   init({ sizeLimit = 1000000 } = {}) {

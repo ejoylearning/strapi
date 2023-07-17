@@ -7,7 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const pluralize = require('pluralize');
-const { nameToSlug, nameToCollectionName } = require('@akemona-org/strapi-utils');
+const { nameToSlug, nameToCollectionName } = require('@toanz/strapi-utils');
 
 /* eslint-disable prefer-template */
 

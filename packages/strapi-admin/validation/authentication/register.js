@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('@akemona-org/strapi-utils');
+const { yup, formatYupErrors } = require('@toanz/strapi-utils');
 const validators = require('../common-validators');
 
 const registrationSchema = yup

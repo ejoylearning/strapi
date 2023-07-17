@@ -6,7 +6,7 @@ const {
   isSingleType,
   getNonWritableAttributes,
   constants: { DP_PUB_STATE_LIVE },
-} = require('@akemona-org/strapi-utils').contentTypes;
+} = require('@toanz/strapi-utils').contentTypes;
 
 const createSingleTypeService = require('./single-type');
 const createCollectionTypeService = require('./collection-type');

@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const yup = require('yup');
-const { formatYupErrors } = require('@akemona-org/strapi-utils');
+const { formatYupErrors } = require('@toanz/strapi-utils');
 
 const { modelTypes, DEFAULT_TYPES } = require('../../services/constants');
 const { isValidCategoryName, isValidIcon } = require('./common');

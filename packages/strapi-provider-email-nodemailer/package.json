@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-provider-email-nodemailer",
+  "name": "@toanz/strapi-provider-email-nodemailer",
   "version": "3.12.4",
   "publishConfig": {
     "access": "public"

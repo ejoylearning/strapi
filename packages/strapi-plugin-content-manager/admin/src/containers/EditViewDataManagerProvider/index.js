@@ -7,7 +7,7 @@ import {
   useGlobalContext,
   OverlayBlocker,
   ContentManagerEditViewDataManagerContext,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getYupInnerErrors } from './utils';

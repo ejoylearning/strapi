@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { useQueryParams } from '@akemona-org/strapi-helper-plugin';
+import { useQueryParams } from '@toanz/strapi-helper-plugin';
 import selectMenuLinks from './selectors';
 import getRedirectionLink from './utils/getRedirectionLink';
 

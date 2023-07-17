@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const { templateConfiguration } = require('@akemona-org/strapi-utils');
+const { templateConfiguration } = require('@toanz/strapi-utils');
 
 /**
  * Requires a file and eval expression if it is a json

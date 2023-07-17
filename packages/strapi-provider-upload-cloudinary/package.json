@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-provider-upload-cloudinary",
+  "name": "@toanz/strapi-provider-upload-cloudinary",
   "publishConfig": {
     "access": "public"
   },
@@ -20,7 +20,7 @@
     "into-stream": "^5.1.0"
   },
   "peerDependencies": {
-    "@akemona-org/strapi-plugin-upload": "^3.1.6"
+    "@toanz/strapi-plugin-upload": "^3.1.6"
   },
   "strapi": {
     "isProvider": true

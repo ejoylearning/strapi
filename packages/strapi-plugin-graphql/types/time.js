@@ -1,6 +1,6 @@
 'use strict';
 
-const { parseType } = require('@akemona-org/strapi-utils');
+const { parseType } = require('@toanz/strapi-utils');
 
 const { Kind, GraphQLScalarType } = require('graphql');
 

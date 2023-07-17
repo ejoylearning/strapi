@@ -9,7 +9,7 @@ import {
   SizedInput,
   useUserPermissions,
   request,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, getRequestURL } from '../../utils';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';

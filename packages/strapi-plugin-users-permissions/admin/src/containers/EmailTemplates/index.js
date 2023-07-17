@@ -9,7 +9,7 @@ import {
   useGlobalContext,
   request,
   getYupInnerErrors,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
 import { useForm } from '../../hooks';

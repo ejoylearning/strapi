@@ -4,8 +4,8 @@ const _ = require('lodash');
 const { getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
 
-const generator = require('@akemona-org/strapi-generate');
-const { nameToSlug, contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
+const generator = require('@toanz/strapi-generate');
+const { nameToSlug, contentTypes: contentTypesUtils } = require('@toanz/strapi-utils');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');

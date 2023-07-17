@@ -1,4 +1,4 @@
-import { request } from '@akemona-org/strapi-helper-plugin';
+import { request } from '@toanz/strapi-helper-plugin';
 import generateModelsLinks from './generateModelsLinks';
 import checkPermissions from './checkPermissions';
 

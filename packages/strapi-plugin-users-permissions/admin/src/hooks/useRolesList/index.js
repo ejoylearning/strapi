@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef } from 'react';
-import { request } from '@akemona-org/strapi-helper-plugin';
+import { request } from '@toanz/strapi-helper-plugin';
 import { get } from 'lodash';
 import init from './init';
 import pluginId from '../../pluginId';

@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-admin",
+  "name": "@toanz/strapi-admin",
   "publishConfig": {
     "access": "public"
   },
@@ -17,8 +17,8 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@akemona-org/strapi-helper-plugin": "3.12.4",
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-helper-plugin": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "@babel/core": "^7.14.0",
     "@babel/plugin-proposal-async-generator-functions": "^7.13.15",
     "@babel/plugin-proposal-class-properties": "^7.12.1",

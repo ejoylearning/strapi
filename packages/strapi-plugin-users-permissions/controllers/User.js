@@ -7,7 +7,7 @@
  */
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('@akemona-org/strapi-utils');
+const { sanitizeEntity } = require('@toanz/strapi-utils');
 const adminUserController = require('./user/admin');
 const apiUserController = require('./user/api');
 

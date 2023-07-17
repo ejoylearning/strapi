@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const pmap = require('p-map');
-const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@toanz/strapi-utils');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 

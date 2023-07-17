@@ -15,13 +15,13 @@ module.exports = ({ scope, client }) => {
     case 'postgres':
     case 'mysql':
       return {
-        '@akemona-org/strapi-connector-bookshelf': scope.strapiVersion,
+        '@toanz/strapi-connector-bookshelf': scope.strapiVersion,
         knex: '2.4.0',
         ...sqlClientModule[client],
       };
     case 'mongo':
       return {
-        '@akemona-org/strapi-connector-mongoose': scope.strapiVersion,
+        '@toanz/strapi-connector-mongoose': scope.strapiVersion,
       };
     default:
       throw new Error(`Invalid client "${client}"`);

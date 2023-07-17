@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const compose = require('koa-compose');
 
-const { policy: policyUtils } = require('@akemona-org/strapi-utils');
+const { policy: policyUtils } = require('@toanz/strapi-utils');
 const {
   convertToParams,
   convertToQuery,

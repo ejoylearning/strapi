@@ -1,4 +1,4 @@
-import { hasPermissions } from '@akemona-org/strapi-helper-plugin';
+import { hasPermissions } from '@toanz/strapi-helper-plugin';
 
 /**
  * This function resolves an array of Promises<boolean>

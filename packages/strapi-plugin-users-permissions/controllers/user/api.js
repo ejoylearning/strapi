@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { sanitizeEntity } = require('@akemona-org/strapi-utils');
+const { sanitizeEntity } = require('@toanz/strapi-utils');
 
 const sanitizeUser = (user) =>
   sanitizeEntity(user, {

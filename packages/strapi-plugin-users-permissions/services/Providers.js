@@ -11,7 +11,7 @@ const request = require('request');
 // Purest strategies.
 const purest = require('purest')({ request });
 const purestConfig = require('@purest/providers');
-const { getAbsoluteServerUrl } = require('@akemona-org/strapi-utils');
+const { getAbsoluteServerUrl } = require('@toanz/strapi-utils');
 const jwt = require('jsonwebtoken');
 
 /**

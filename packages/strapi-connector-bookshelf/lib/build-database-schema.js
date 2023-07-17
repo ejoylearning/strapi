@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { singular } = require('pluralize');
-const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@toanz/strapi-utils');
 
 const {
   getDefinitionFromStore,

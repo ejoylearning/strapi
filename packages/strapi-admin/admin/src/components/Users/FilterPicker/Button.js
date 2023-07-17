@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { FilterIcon } from '@akemona-org/strapi-helper-plugin';
+import { FilterIcon } from '@toanz/strapi-helper-plugin';
 
 const Button = () => {
   return (

@@ -13,7 +13,7 @@ module.exports = function requireConnector(connector) {
   }
 
   try {
-    require.resolve(`@akemona-org/strapi-connector-${connector}`);
+    require.resolve(`@toanz/strapi-connector-${connector}`);
   } catch (error) {
     throw new VError(
       { name: 'ConnectorError', cause: error },
@@ -23,7 +23,7 @@ module.exports = function requireConnector(connector) {
   }
 
   try {
-    return require(`@akemona-org/strapi-connector-${connector}`);
+    return require(`@toanz/strapi-connector-${connector}`);
   } catch (error) {
     throw new VError(
       { name: 'ConnectorError', cause: error },

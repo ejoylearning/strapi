@@ -11,7 +11,7 @@ const program = new Command();
 // eslint-disable-next-line import/extensions
 const packageJSON = require('../package.json');
 
-const strapiPackageName = '@akemona-org/strapi';
+const strapiPackageName = '@toanz/strapi';
 
 const checkCwdIsStrapiApp = (name) => {
   let logErrorAndExit = () => {

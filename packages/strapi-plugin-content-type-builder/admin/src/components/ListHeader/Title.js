@@ -5,7 +5,7 @@
  */
 
 import styled from 'styled-components';
-import { colors } from '@akemona-org/strapi-helper-plugin';
+import { colors } from '@toanz/strapi-helper-plugin';
 
 const Title = styled.p`
   margin-bottom: 0;

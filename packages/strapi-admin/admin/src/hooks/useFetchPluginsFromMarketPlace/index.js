@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useGlobalContext } from '@akemona-org/strapi-helper-plugin';
+import { useGlobalContext } from '@toanz/strapi-helper-plugin';
 
 const useFetchPluginsFromMarketPlace = () => {
   const { currentLocale } = useGlobalContext();

@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const { pick, pipe, has, prop, isNil, cloneDeep, isArray } = require('lodash/fp');
 const { isRelationalAttribute, getVisibleAttributes, isMediaAttribute, isTypedAttribute } =
-  require('@akemona-org/strapi-utils').contentTypes;
+  require('@toanz/strapi-utils').contentTypes;
 const { getService } = require('../utils');
 
 const hasLocalizedOption = (modelOrAttribute) => {

@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { useGlobalContext } from '@akemona-org/strapi-helper-plugin';
+import { useGlobalContext } from '@toanz/strapi-helper-plugin';
 import { get } from 'lodash';
 import { useParams } from 'react-router-dom';
 import PageTitle from '../../../../components/SettingsPageTitle';

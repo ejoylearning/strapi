@@ -4,7 +4,7 @@ import {
   request,
   generateSearchFromFilters,
   useGlobalContext,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { clone, get, isEmpty, set } from 'lodash';
 import { useIntl } from 'react-intl';
 import axios from 'axios';

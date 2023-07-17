@@ -1,6 +1,6 @@
 'use strict';
 
-const { providerFactory, hooks } = require('@akemona-org/strapi-utils');
+const { providerFactory, hooks } = require('@toanz/strapi-utils');
 const { validateRegisterProviderAction } = require('../../validation/action-provider');
 const domain = require('./index');
 

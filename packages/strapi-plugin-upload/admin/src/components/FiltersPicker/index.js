@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { FilterIcon } from '@akemona-org/strapi-helper-plugin';
+import { FilterIcon } from '@toanz/strapi-helper-plugin';
 import { Picker } from '@buffetjs/core';
 import FiltersCard from './FiltersCard';
 

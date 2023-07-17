@@ -1,5 +1,5 @@
 {
-  "name": "@akemona-org/strapi-plugin-i18n",
+  "name": "@toanz/strapi-plugin-i18n",
   "publishConfig": {
     "access": "public"
   },
@@ -12,7 +12,7 @@
     "required": false
   },
   "dependencies": {
-    "@akemona-org/strapi-utils": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "lodash": "4.17.21",
     "p-map": "4.0.0",
     "pluralize": "8.0.0"

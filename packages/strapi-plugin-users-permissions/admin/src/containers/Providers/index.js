@@ -9,7 +9,7 @@ import {
   useGlobalContext,
   getYupInnerErrors,
   request,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';

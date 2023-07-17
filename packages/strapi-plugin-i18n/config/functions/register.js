@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { PUBLISHED_AT_ATTRIBUTE } = require('@akemona-org/strapi-utils').contentTypes.constants;
+const { PUBLISHED_AT_ATTRIBUTE } = require('@toanz/strapi-utils').contentTypes.constants;
 
 const { getService } = require('../../utils');
 const fieldMigration = require('./migrations/field');

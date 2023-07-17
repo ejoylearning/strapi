@@ -15,7 +15,7 @@ import {
   useGlobalContext,
   LeftMenuList,
   LoadingIndicatorPage,
-} from '@akemona-org/strapi-helper-plugin';
+} from '@toanz/strapi-helper-plugin';
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import HeaderSearch from '../../components/HeaderSearch';

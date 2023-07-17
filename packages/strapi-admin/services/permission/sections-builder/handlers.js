@@ -1,6 +1,6 @@
 'use strict';
 
-const { isVisibleAttribute } = require('@akemona-org/strapi-utils').contentTypes;
+const { isVisibleAttribute } = require('@toanz/strapi-utils').contentTypes;
 
 const {
   toSubjectTemplate,

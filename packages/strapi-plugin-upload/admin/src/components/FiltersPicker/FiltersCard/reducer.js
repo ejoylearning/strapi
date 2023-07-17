@@ -1,5 +1,5 @@
 import { fromJS } from 'immutable';
-import { dateToUtcTime } from '@akemona-org/strapi-helper-plugin';
+import { dateToUtcTime } from '@toanz/strapi-helper-plugin';
 import moment from 'moment';
 
 import filtersForm from './utils/filtersForm';
