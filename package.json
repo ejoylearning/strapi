@@ -97,6 +97,7 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "name": "@toanz/strapi",
+  "version": "3.12.4",
   "workspaces": [
     "packages/*",
     "examples/*"
