@@ -15,8 +15,6 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@toanz/strapi-helper-plugin": "3.12.4",
-    "@toanz/strapi-utils": "3.12.4",
     "@buffetjs/core": "3.3.8",
     "@buffetjs/custom": "3.3.8",
     "@buffetjs/hooks": "3.3.8",
@@ -24,6 +22,8 @@
     "@buffetjs/styles": "3.3.8",
     "@buffetjs/utils": "3.3.8",
     "@purest/providers": "^1.0.2",
+    "@toanz/strapi-helper-plugin": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "bcryptjs": "^2.4.3",
     "grant-koa": "5.4.8",
     "immutable": "^3.8.2",

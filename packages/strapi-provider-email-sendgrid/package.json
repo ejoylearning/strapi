@@ -16,8 +16,8 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@toanz/strapi-utils": "3.12.4",
-    "@sendgrid/mail": "6.4.0"
+    "@sendgrid/mail": "6.4.0",
+    "@toanz/strapi-utils": "3.12.4"
   },
   "strapi": {
     "isProvider": true

@@ -17,8 +17,6 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@toanz/strapi-helper-plugin": "3.12.4",
-    "@toanz/strapi-utils": "3.12.4",
     "@babel/core": "^7.14.0",
     "@babel/plugin-proposal-async-generator-functions": "^7.13.15",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
@@ -42,6 +40,8 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
+    "@toanz/strapi-helper-plugin": "3.12.4",
+    "@toanz/strapi-utils": "3.12.4",
     "autoprefixer": "^9.8.6",
     "axios": "^0.21.1",
     "babel-loader": "^8.1.0",
