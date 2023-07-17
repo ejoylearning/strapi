@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Padded, Text } from '@buffetjs/core';
-import { Modal } from 'strapi-helper-plugin';
+import { Modal } from '@akemona-org/strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import { Arrow, Download, Option, Wrapper } from './components';
 
@@ -53,7 +53,7 @@ const UpgradePlanModal = ({ isOpen, onToggle }) => {
       </Wrapper>
 
       <a
-        href="https://strapi.io/pricing"
+        href="https://strapi.akemona.com/pricing"
         target="_blank"
         rel="noopener noreferrer"
         style={{ display: 'none' }}

@@ -14,26 +14,27 @@ const defaults = {
   keepHeadersOnError: false,
 };
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook
      */
     initialize() {
-      const {
-        origin,
-        expose,
-        maxAge,
-        credentials,
-        methods,
-        headers,
-        keepHeadersOnError,
-      } = Object.assign({}, defaults, strapi.config.get('middleware.settings.cors'));
+      const { origin, expose, maxAge, credentials, methods, headers, keepHeadersOnError } =
+        Object.assign({}, defaults, strapi.config.get('middleware.settings.cors'));
 
       strapi.app.use(
         cors({
-          origin: function(ctx) {
-            const whitelist = Array.isArray(origin) ? origin : origin.split(/\s*,\s*/);
+          origin: async function (ctx) {
+            let originList;
+
+            if (typeof origin === 'function') {
+              originList = await origin(ctx);
+            } else {
+              originList = origin;
+            }
+
+            const whitelist = Array.isArray(originList) ? originList : originList.split(/\s*,\s*/);
 
             const requestOrigin = ctx.accept.headers.origin;
             if (whitelist.includes('*')) {

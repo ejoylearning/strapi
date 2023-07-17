@@ -77,6 +77,7 @@ module.exports = async () => {
       key: '',
       secret: '',
       callback: `${strapi.config.server.url}/auth/instagram/callback`,
+      scope: ['user_profile'],
     },
     vk: {
       enabled: false,
@@ -111,6 +112,33 @@ module.exports = async () => {
       callback: `${strapi.config.server.url}/auth/cognito/callback`,
       scope: ['email', 'openid', 'profile'],
     },
+    reddit: {
+      enabled: false,
+      icon: 'reddit',
+      key: '',
+      secret: '',
+      state: true,
+      callback: `${strapi.config.server.url}/auth/reddit/callback`,
+      scope: ['identity'],
+    },
+    auth0: {
+      enabled: false,
+      icon: '',
+      key: '',
+      secret: '',
+      subdomain: 'my-tenant.eu',
+      callback: `${strapi.config.server.url}/auth/auth0/callback`,
+      scope: ['openid', 'email', 'profile'],
+    },
+    cas: {
+      enabled: false,
+      icon: 'book',
+      key: '',
+      secret: '',
+      callback: `${strapi.config.server.url}/auth/cas/callback`,
+      scope: ['openid email'], // scopes should be space delimited
+      subdomain: 'my.subdomain.com/cas',
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
@@ -118,7 +146,7 @@ module.exports = async () => {
   // or we have added/deleted provider here.
   if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
     // merge with the previous provider config.
-    _.keys(grantConfig).forEach(key => {
+    _.keys(grantConfig).forEach((key) => {
       if (key in prevGrantConfig) {
         grantConfig[key] = _.merge(grantConfig[key], prevGrantConfig[key]);
       }
@@ -200,6 +228,7 @@ module.exports = async () => {
     strapi.reload.isWatching = true;
   }
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(usersPermissionsActions.actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(
+    usersPermissionsActions.actions
+  );
 };

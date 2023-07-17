@@ -1,5 +1,7 @@
 # Plugin documentation
 
+### Maintenance release by Akemona
+
 This plugin automates your API documentation creation. It basically generates a swagger file. It follows the [Open API specification version 3.0.1](https://swagger.io/specification/).
 The documentation plugin is not release on npm yet, Here's how to install it.
 

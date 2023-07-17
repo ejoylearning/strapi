@@ -6,16 +6,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Flex, Padded } from '@buffetjs/core';
 
 import { getTrad } from '../../utils';
 import Wrapper from './Wrapper';
-import Padded from '../Padded';
 import IntlText from '../IntlText';
-import Flex from '../Flex';
 import Count from './Count';
 
 const ModalTab = ({ isDisabled, label, to, isActive, onClick, count }) => {
-  const handleClick = e => {
+  const handleClick = (e) => {
     if (isDisabled) {
       e.preventDefault();
 

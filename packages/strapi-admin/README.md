@@ -1,10 +1,8 @@
 # Strapi built-in admin panel
 
-## Description
+---
 
-TODO
-
-## Contribute
+### Maintenance release by Akemona
 
 ### Setup
 

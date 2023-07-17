@@ -40,12 +40,11 @@ const DraggedFieldWithPreview = forwardRef(
     const width = isFullSize && dragStart ? 0 : '100%';
     const higherFields = ['json', 'text', 'file', 'media', 'component', 'richtext', 'dynamiczone'];
     const withLongerHeight = higherFields.includes(type) && !dragStart;
-    const getCompoInfos = uid =>
-      get(componentLayouts, [uid, 'schema', 'info'], { name: '', icon: '' });
+    const getCompoInfos = (uid) => get(componentLayouts, [uid, 'info'], { name: '', icon: '' });
 
     const componentData = get(componentLayouts, [componentUid], {});
     const componentLayout = get(componentData, ['layouts', 'edit'], []);
-    const getWrapperWitdh = colNum => `${(1 / 12) * colNum * 100}%`;
+    const getWrapperWitdh = (colNum) => `${(1 / 12) * colNum * 100}%`;
 
     return (
       <div
@@ -96,10 +95,10 @@ const DraggedFieldWithPreview = forwardRef(
                         }}
                         key={i}
                       >
-                        {row.map(field => {
+                        {row.map((field) => {
                           const fieldType = get(
                             componentData,
-                            ['schema', 'attributes', field.name, 'type'],
+                            ['attributes', field.name, 'type'],
                             ''
                           );
                           const label = get(
@@ -130,7 +129,7 @@ const DraggedFieldWithPreview = forwardRef(
                   })}
                 {type === 'dynamiczone' && (
                   <DynamicZoneWrapper>
-                    {dynamicZoneComponents.map(compo => {
+                    {dynamicZoneComponents.map((compo) => {
                       const { name, icon } = getCompoInfos(compo);
 
                       return (

@@ -5,24 +5,19 @@ const _ = require('lodash');
 
 const MixedSchemaType = yup.mixed;
 
-const isNotNilTest = value => !_.isNil(value);
+const isNotNilTest = (value) => !_.isNil(value);
 
 function isNotNill(msg = '${path} must be defined.') {
   return this.test('defined', msg, isNotNilTest);
 }
 
-const isNotNullTest = value => !_.isNull(value);
+const isNotNullTest = (value) => !_.isNull(value);
 function isNotNull(msg = '${path} cannot be null.') {
   return this.test('defined', msg, isNotNullTest);
 }
 
-function arrayRequiredAllowEmpty(message = '${path} is required') {
-  return this.test('field is required', message, value => _.isArray(value));
-}
-
 yup.addMethod(yup.mixed, 'notNil', isNotNill);
 yup.addMethod(yup.mixed, 'notNull', isNotNull);
-yup.addMethod(yup.array, 'requiredAllowEmpty', arrayRequiredAllowEmpty);
 
 class StrapiIDSchema extends MixedSchemaType {
   constructor() {
@@ -40,7 +35,7 @@ yup.strapiID = () => new StrapiIDSchema();
  * Returns a formatted error for http responses
  * @param {Object} validationError - a Yup ValidationError
  */
-const formatYupErrors = validationError => {
+const formatYupErrors = (validationError) => {
   if (!validationError.inner) {
     throw new Error('invalid.input');
   }

@@ -1,11 +1,11 @@
 import { useContext, useEffect, useReducer } from 'react';
-import { useGlobalContext, hasPermissions, UserContext } from 'strapi-helper-plugin';
+import { useGlobalContext, hasPermissions, UserContext } from '@akemona-org/strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
 import init from './init';
 
 const useSettingsMenu = (noCheck = false) => {
-  const permissions = useContext(UserContext);
+  const { userPermissions: permissions } = useContext(UserContext);
   const { plugins } = useGlobalContext();
 
   const [{ isLoading, menu }, dispatch] = useReducer(reducer, initialState, () =>
@@ -20,9 +20,9 @@ const useSettingsMenu = (noCheck = false) => {
         return { hasPermission, path };
       };
 
-      const generateArrayOfPromises = array => {
+      const generateArrayOfPromises = (array) => {
         return array.reduce((acc, current, sectionIndex) => {
-          const generateArrayOfPromises = array =>
+          const generateArrayOfPromises = (array) =>
             array.map((link, index) =>
               checkPermissions(array[index].permissions, `${sectionIndex}.links.${index}`)
             );

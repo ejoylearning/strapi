@@ -1,20 +1,19 @@
 'use strict';
 
+const os = require('os');
+const path = require('path');
+const _ = require('lodash');
 const dotenv = require('dotenv');
+
 dotenv.config({ path: process.env.ENV_PATH });
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-const os = require('os');
-const path = require('path');
-const _ = require('lodash');
-
-const createConfigProvider = require('./config-provider');
-const loadConfigDir = require('./config-loader');
-
 const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
 const loadPolicies = require('../load-policies');
 const loadFunctions = require('../load-functions');
+const loadConfigDir = require('./config-loader');
+const createConfigProvider = require('./config-provider');
 
 const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
 
@@ -76,14 +75,15 @@ module.exports = (dir, initialConfig = {}) => {
     autoReload,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
-    template: _.get(pkgJSON, 'strapi.template'),
+    packageJsonStrapi: _.omit(_.get(pkgJSON, 'strapi', {}), 'uuid'),
     info: {
       ...pkgJSON,
       strapi: strapiVersion,
     },
-    installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
-    installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
-    installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
+    installedPlugins: getPrefixedDeps('@akemona-org/strapi-plugin', pkgJSON),
+    installedMiddlewares: getPrefixedDeps('@akemona-org/strapi-middleware', pkgJSON),
+    installedHooks: getPrefixedDeps('@akemona-org/strapi-hook', pkgJSON),
+    installedProviders: getPrefixedDeps('@akemona-org/strapi-provider', pkgJSON),
   };
 
   const baseConfig = {

@@ -1,7 +1,12 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-import { Modal, ModalFooter, ModalHeader, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  Modal,
+  ModalFooter,
+  ModalHeader,
+  useGlobalContext,
+} from '@akemona-org/strapi-helper-plugin';
 import stepper from './stepper';
 
 const ModalForm = ({ isOpen, onClosed, onToggle }) => {
@@ -32,15 +37,14 @@ const ModalForm = ({ isOpen, onClosed, onToggle }) => {
   };
 
   const handleClosed = () => {
-    setStep('create');
-
     // Fetch data only if the user has submitted a new entry
     // We can use the registrationToken to know this
-    if (registrationToken) {
+    if (registrationToken || currentStep === 'magic-link') {
       onClosed();
     }
 
     // Reset the state so we know that the user has created a new entry when there is a registrationToken
+    setStep('create');
     setShowBody(false);
     setRegistrationToken(null);
   };

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { useUserPermissions, request } from 'strapi-helper-plugin';
+import { useUserPermissions, request } from '@akemona-org/strapi-helper-plugin';
 import { getRequestURL } from '../../utils';
 import reducer, { initialState } from './reducer';
 
@@ -68,7 +68,7 @@ const useUserForm = (endPoint, permissions) => {
     });
   }, []);
 
-  const dispatchSetFormErrors = useCallback(errors => {
+  const dispatchSetFormErrors = useCallback((errors) => {
     dispatch({ type: 'SET_ERRORS', errors });
   }, []);
 

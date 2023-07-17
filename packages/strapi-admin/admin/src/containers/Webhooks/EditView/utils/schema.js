@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { translatedErrors } from 'strapi-helper-plugin';
+import { translatedErrors } from '@akemona-org/strapi-helper-plugin';
 import { NAME_REGEX, URL_REGEX } from './fieldsRegex';
 
 const schema = yup.object().shape({
@@ -11,7 +11,7 @@ const schema = yup.object().shape({
     .string(translatedErrors.string)
     .required(translatedErrors.required)
     .matches(URL_REGEX, translatedErrors.regex),
-  headers: yup.lazy(array => {
+  headers: yup.lazy((array) => {
     let baseSchema = yup.array();
 
     if (array.length === 1) {
@@ -29,7 +29,7 @@ const schema = yup.object().shape({
       })
     );
   }),
-  events: yup.array().required(translatedErrors.required),
+  events: yup.array(),
 });
 
 export default schema;

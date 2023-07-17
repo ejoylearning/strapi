@@ -1,10 +1,8 @@
 import { useCallback, useReducer, useEffect } from 'react';
-import { request } from 'strapi-helper-plugin';
-
+import { request } from '@akemona-org/strapi-helper-plugin';
 import reducer, { initialState } from './reducer';
-import { formatPermissionsFromApi } from '../../utils';
 
-const useFetchRole = id => {
+const useFetchRole = (id) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -14,17 +12,17 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         role: {},
-        permissions: {},
+        permissions: [],
       });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const fetchRole = async roleId => {
+  const fetchRole = async (roleId) => {
     try {
       const [{ data: role }, { data: permissions }] = await Promise.all(
-        [`roles/${roleId}`, `roles/${roleId}/permissions`].map(endPoint =>
+        [`roles/${roleId}`, `roles/${roleId}/permissions`].map((endPoint) =>
           request(`/admin/${endPoint}`, { method: 'GET' })
         )
       );
@@ -32,7 +30,7 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         role,
-        permissions: formatPermissionsFromApi(permissions),
+        permissions,
       });
     } catch (err) {
       console.error(err);
@@ -47,7 +45,7 @@ const useFetchRole = id => {
     }
   };
 
-  const handleSubmitSucceeded = useCallback(data => {
+  const handleSubmitSucceeded = useCallback((data) => {
     dispatch({
       type: 'ON_SUBMIT_SUCCEEDED',
       ...data,

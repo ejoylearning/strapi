@@ -505,7 +505,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   </div>
   <span
     style={
-      Object {
+      {
         "display": "none",
       }
     }
@@ -791,6 +791,12 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
             className=" css-2b097c-container"
             onKeyDown={[Function]}
           >
+            <span
+              aria-atomic="false"
+              aria-live="polite"
+              aria-relevant="additions text"
+              className="css-1f43avz-a11yText-A11yText"
+            />
             <div
               className=" css-1w9ejix-control"
               onMouseDown={[Function]}
@@ -808,7 +814,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                   <div
                     className=""
                     style={
-                      Object {
+                      {
                         "display": "inline-block",
                       }
                     }
@@ -825,7 +831,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                       onFocus={[Function]}
                       spellCheck="false"
                       style={
-                        Object {
+                        {
                           "background": 0,
                           "border": 0,
                           "boxSizing": "content-box",
@@ -844,7 +850,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                     />
                     <div
                       style={
-                        Object {
+                        {
                           "height": 0,
                           "left": 0,
                           "overflow": "scroll",
@@ -871,7 +877,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                 >
                   <svg
                     aria-hidden="true"
-                    className="css-6q0nyr-Svg"
+                    className="css-tj5bde-Svg"
                     focusable="false"
                     height={20}
                     viewBox="0 0 20 20"
@@ -893,7 +899,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                 >
                   <svg
                     aria-hidden="true"
-                    className="css-6q0nyr-Svg"
+                    className="css-tj5bde-Svg"
                     focusable="false"
                     height={20}
                     viewBox="0 0 20 20"

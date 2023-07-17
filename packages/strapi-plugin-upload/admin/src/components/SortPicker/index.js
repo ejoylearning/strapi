@@ -1,12 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { useGlobalContext } from 'strapi-helper-plugin';
-import { Carret } from '@buffetjs/icons';
+import { Carret, useGlobalContext } from '@akemona-org/strapi-helper-plugin';
+import { Picker } from '@buffetjs/core';
 import { getTrad, getFileModelTimestamps } from '../../utils';
 
 import SortList from '../SortList';
-import Picker from '../Picker';
 
 const SortPicker = ({ onChange, value }) => {
   const { plugins } = useGlobalContext();
@@ -22,17 +21,17 @@ const SortPicker = ({ onChange, value }) => {
 
   return (
     <Picker
-      renderButtonContent={isOpen => (
+      renderButtonContent={(isOpen) => (
         <>
           <FormattedMessage id={getTrad('sort.label')} />
-          <Carret fill={isOpen ? '#007EFF' : '#292b2c'} />
+          <Carret isUp={isOpen} fill={isOpen ? '#007EFF' : '#292b2c'} />
         </>
       )}
-      renderSectionContent={onToggle => (
+      renderSectionContent={(onToggle) => (
         <SortList
           list={orders}
           selectedItem={value}
-          onClick={e => {
+          onClick={(e) => {
             onChange(e);
             onToggle();
           }}

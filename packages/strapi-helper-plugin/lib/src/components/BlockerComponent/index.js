@@ -69,7 +69,7 @@ const renderButton = () => (
   <ButtonWrapper>
     <a
       className={cn('primary', 'btn')}
-      href="http://strapi.io"
+      href="https://strapi.akemona.com"
       target="_blank"
       rel="noopener noreferrer"
     >

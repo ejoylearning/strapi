@@ -1,27 +1,42 @@
 'use strict';
 
 const _ = require('lodash');
-const { QUERY_OPERATORS } = require('strapi-utils');
+const { QUERY_OPERATORS } = require('@akemona-org/strapi-utils');
 
 /**
- * Merges
+ * @typedef {object} Schema
+ * @property {object} resolvers
+ * @property {object} mutation
+ * @property {object} query
+ * @property {string} definition
  */
-const mergeSchemas = (root, ...subs) => {
-  subs.forEach(sub => {
+
+/**
+ * Merges strapi graphql schema together
+ * @param {Schema} object - destination object
+ * @param  {Schema[]} sources - source objects to merge into the destination object
+ * @returns {Schema}
+ */
+const mergeSchemas = (object, ...sources) => {
+  sources.forEach((sub) => {
     if (_.isEmpty(sub)) return;
     const { definition = '', query = {}, mutation = {}, resolvers = {} } = sub;
 
-    root.definition += '\n' + definition;
-    _.merge(root, {
+    object.definition += '\n' + definition;
+    _.merge(object, {
       query,
       mutation,
       resolvers,
     });
   });
 
-  return root;
+  return object;
 };
 
+/**
+ * Returns an empty schema
+ * @returns {Schema}
+ */
 const createDefaultSchema = () => ({
   definition: '',
   query: {},
@@ -32,8 +47,8 @@ const createDefaultSchema = () => ({
 const diffResolvers = (object, base) => {
   let newObj = {};
 
-  Object.keys(object).forEach(type => {
-    Object.keys(object[type]).forEach(resolver => {
+  Object.keys(object).forEach((type) => {
+    Object.keys(object[type]).forEach((resolver) => {
       if (type === 'Query' || type === 'Mutation') {
         if (!_.has(base, [type, resolver])) {
           _.set(newObj, [type, resolver], _.get(object, [type, resolver]));
@@ -47,7 +62,7 @@ const diffResolvers = (object, base) => {
   return newObj;
 };
 
-const convertToParams = params => {
+const convertToParams = (params) => {
   return Object.keys(params).reduce((acc, current) => {
     const key = current === 'id' ? 'id' : `_${current}`;
     acc[key] = params[current];
@@ -55,7 +70,7 @@ const convertToParams = params => {
   }, {});
 };
 
-const convertToQuery = params => {
+const convertToQuery = (params) => {
   const result = {};
 
   _.forEach(params, (value, key) => {
@@ -79,7 +94,7 @@ const amountLimiting = (params = {}) => {
 
   if (!amountLimit) return params;
 
-  if (!params.limit || params.limit === -1 || params.limit > amountLimit) {
+  if (_.isNil(params.limit) || params.limit === -1 || params.limit > amountLimit) {
     params.limit = amountLimit;
   } else if (params.limit < 0) {
     params.limit = 0;
@@ -88,7 +103,7 @@ const amountLimiting = (params = {}) => {
   return params;
 };
 
-const nonRequired = type => type.replace('!', '');
+const nonRequired = (type) => type.replace('!', '');
 
 const actionExists = ({ resolver, resolverOf }) => {
   if (isResolvablePath(resolverOf)) {
@@ -107,7 +122,7 @@ const actionExists = ({ resolver, resolverOf }) => {
   }
 };
 
-const getAction = resolver => {
+const getAction = (resolver) => {
   if (!_.isString(resolver)) {
     throw new Error(`Error building query. Expected a string, got ${resolver}`);
   }
@@ -124,7 +139,7 @@ const getAction = resolver => {
   return actionFn;
 };
 
-const getActionFn = details => {
+const getActionFn = (details) => {
   const { controller, action, plugin, api } = details;
 
   if (plugin) {
@@ -134,7 +149,7 @@ const getActionFn = details => {
   return _.get(strapi.api, [_.toLower(api), 'controllers', _.toLower(controller), action]);
 };
 
-const getActionDetails = resolver => {
+const getActionDetails = (resolver) => {
   if (resolver.startsWith('plugins::')) {
     const [, path] = resolver.split('::');
     const [plugin, controller, action] = path.split('.');
@@ -167,7 +182,7 @@ const getActionDetails = resolver => {
   );
 };
 
-const isResolvablePath = path => _.isString(path) && !_.isEmpty(path);
+const isResolvablePath = (path) => _.isString(path) && !_.isEmpty(path);
 
 module.exports = {
   diffResolvers,

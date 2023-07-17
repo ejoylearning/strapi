@@ -10,16 +10,16 @@ const moduleNameMapper = {
   ],
 };
 
-if (IS_EE) {
-  const rootDirEE = [
-    '<rootDir>/packages/strapi-admin/ee/admin$1',
-    '<rootDir>/packages/strapi-plugin-*/ee/admin$1',
-  ];
+// if (IS_EE) {
+//   const rootDirEE = [
+//     '<rootDir>/packages/strapi-admin/ee/admin$1',
+//     '<rootDir>/packages/strapi-plugin-*/ee/admin$1',
+//   ];
 
-  Object.assign(moduleNameMapper, {
-    '^ee_else_ce(/.*)$': rootDirEE,
-  });
-}
+//   Object.assign(moduleNameMapper, {
+//     '^ee_else_ce(/.*)$': rootDirEE,
+//   });
+// }
 
 module.exports = {
   collectCoverageFrom: [
@@ -44,6 +44,7 @@ module.exports = {
     PUBLIC_PATH: '/admin',
     REMOTE_URL: '/',
     NODE_ENV: 'test',
+    ENABLED_EE_FEATURES: [],
   },
   moduleDirectories: [
     'node_modules',
@@ -58,17 +59,21 @@ module.exports = {
     '<rootDir>/examples/getstarted/',
     '<rootDir>/packages/strapi-helper-plugin/dist/',
     '/OLD/',
+    '__tests__',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/test/config/front/enzyme-setup.js',
     '<rootDir>/test/config/front/strapi.js',
   ],
+  testEnvironment: 'jsdom',
   testRegex: 'tests/.*\\.test\\.js$',
   transform: {
-    '^.+\\.js$': ['@swc-node/jest', { jsx: true, dynamicImport: true }],
+    '^.+\\.js$': ['@swc/jest', { jsc: { parser: { jsx: true, dynamicImport: true } } }],
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/fileTransformer.js',
   },
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
-  testURL: 'http://localhost:4000/admin',
+  testEnvironmentOptions: {
+    url: 'http://localhost:4000/admin',
+  },
 };

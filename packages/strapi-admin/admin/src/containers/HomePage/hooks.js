@@ -16,7 +16,7 @@ const useFetch = () => {
     const fetchData = async () => {
       try {
         const { data } = await axios.get(
-          'https://strapi.io/api/blog-posts?_limit=2&_sort=publishedAt:desc',
+          'https://strapi.akemona.com/api/blog-posts?_limit=2&_sort=publishedAt:desc',
           {
             cancelToken: source.token,
           }

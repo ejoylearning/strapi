@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useGlobalContext, ListButton } from 'strapi-helper-plugin';
+import { useGlobalContext, ListButton } from '@akemona-org/strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 
@@ -40,10 +40,11 @@ function List({
   isSub,
   dzName,
 }) {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage, emitEvent } = useGlobalContext();
   const { isInDevelopmentMode, modifiedData } = useDataManager();
   const { openModalAddField } = useListView();
   const onClickAddField = () => {
+    emitEvent('hasClickedCTBAddFieldBanner');
     const firstComponentIcon = get(
       modifiedData,
       ['components', firstLoopComponentUid, 'schema', 'icon'],
@@ -187,7 +188,7 @@ function List({
       <Wrapper className={className} isFromDynamicZone={isFromDynamicZone}>
         <table>
           <tbody>
-            {items.map(item => {
+            {items.map((item) => {
               const { type } = item;
               const CustomRow = customRowComponent;
 

@@ -4,17 +4,24 @@
  */
 
 const _ = require('lodash');
+const { omit } = require('lodash/fp');
 const pmap = require('p-map');
-const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery, escapeQuery } = require('@akemona-org/strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
+const { singular } = require('pluralize');
+const { handleDatabaseError } = require('./utils/errors');
+
+const BATCH_SIZE = 1000;
+
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+const pickCountFilters = omit(['sort', 'limit', 'start']);
 
 module.exports = function createQueryBuilder({ model, strapi }) {
   /* Utils */
   // association key
-  const assocKeys = model.associations.map(ast => ast.alias);
+  const assocKeys = model.associations.map((ast) => ast.alias);
   // component keys
-  const componentKeys = Object.keys(model.attributes).filter(key => {
+  const componentKeys = Object.keys(model.attributes).filter((key) => {
     return ['dynamiczone', 'component'].includes(model.attributes[key].type);
   });
 
@@ -22,14 +29,14 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(model);
 
   // Returns an object with relation keys only to create relations in DB
-  const pickRelations = attributes => {
+  const pickRelations = (attributes) => {
     return _.pick(attributes, assocKeys);
   };
 
   // keys to exclude to get attribute keys
   const excludedKeys = assocKeys.concat(componentKeys);
   // Returns an object without relational keys to persist in DB
-  const selectAttributes = attributes => {
+  const selectAttributes = (attributes) => {
     return _.pickBy(attributes, (value, key) => {
       if (Array.isArray(timestamps) && timestamps.includes(key)) {
         return false;
@@ -43,8 +50,18 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const db = strapi.connections[model.connection];
 
     if (transacting) return fn(transacting);
-    return db.transaction(trx => fn(trx));
+    return db.transaction((trx) => fn(trx));
   };
+
+  const wrapErrors =
+    (fn) =>
+    async (...args) => {
+      try {
+        return await fn(...args);
+      } catch (error) {
+        return handleDatabaseError(error);
+      }
+    };
 
   /**
    * Find one entry based on params
@@ -68,19 +85,16 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         transacting,
         publicationState: filters.publicationState,
       })
-      .then(results => results.toJSON());
+      .then((results) => results.toJSON());
   }
 
   /**
    * Count entries based on filters
    */
-  function count(params = {}) {
-    const filters = convertRestQueryParams(_.omit(params, ['_sort', '_limit', '_start']));
+  function count(params = {}, { transacting } = {}) {
+    const filters = pickCountFilters(convertRestQueryParams(params));
 
-    return model
-      .query(buildQuery({ model, filters }))
-      .count()
-      .then(Number);
+    return model.query(buildQuery({ model, filters })).count({ transacting }).then(Number);
   }
 
   async function create(attributes, { transacting } = {}) {
@@ -93,7 +107,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         : new Date();
     }
 
-    const runCreate = async trx => {
+    const runCreate = async (trx) => {
       // Create entry with no-relational data.
       const entry = await model.forge(data).save(null, { transacting: trx });
       const isDraft = contentTypesUtils.isDraft(entry.toJSON(), model);
@@ -118,7 +132,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const relations = pickRelations(attributes);
     const data = selectAttributes(attributes);
 
-    const runUpdate = async trx => {
+    const runUpdate = async (trx) => {
       const updatedEntry =
         Object.keys(data).length > 0
           ? await entry.save(data, {
@@ -134,7 +148,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         return model.updateRelations({ id: entry.id, values: relations }, { transacting: trx });
       }
 
-      return this.findOne(params, null, { transacting: trx });
+      return findOne(params, null, { transacting: trx });
     };
 
     return wrapTransaction(runUpdate, { transacting });
@@ -151,7 +165,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
     await model.deleteRelations(id, { transacting });
 
-    const runDelete = async trx => {
+    const runDelete = async (trx) => {
       await deleteComponents(entry, { transacting: trx });
       await model.where({ id: entry.id }).destroy({ transacting: trx, require: false });
       return entry.toJSON();
@@ -160,7 +174,10 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     return wrapTransaction(runDelete, { transacting });
   }
 
-  async function deleteMany(params, { transacting } = {}) {
+  async function deleteMany(
+    params,
+    { transacting, returning = true, batchSize = BATCH_SIZE } = {}
+  ) {
     if (params[model.primaryKey]) {
       const entries = await find({ ...params, _limit: 1 }, null, { transacting });
       if (entries.length > 0) {
@@ -169,29 +186,48 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return null;
     }
 
-    const paramsWithDefaults = _.defaults(params, { _limit: -1 });
-    const entries = await find(paramsWithDefaults, null, { transacting });
-    return pmap(entries, entry => deleteOne(entry.id, { transacting }), {
-      concurrency: 100,
-      stopOnError: true,
-    });
+    if (returning) {
+      const paramsWithDefaults = _.defaults(params, { _limit: -1 });
+      const entries = await find(paramsWithDefaults, null, { transacting });
+      return pmap(entries, (entry) => deleteOne(entry.id, { transacting }), {
+        concurrency: 100,
+        stopOnError: true,
+      });
+    }
+
+    // returning false, we can optimize the function
+    const batchParams = _.assign({}, params, { _limit: batchSize, _sort: 'id:ASC' });
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const batch = await find(batchParams, null, { transacting });
+
+      await pmap(batch, (entry) => deleteOne(entry.id, { transacting }), {
+        concurrency: 100,
+        stopOnError: true,
+      });
+
+      if (batch.length < BATCH_SIZE) {
+        break;
+      }
+    }
   }
 
   function search(params, populate) {
     const filters = convertRestQueryParams(_.omit(params, '_q'));
 
     return model
-      .query(qb => qb.where(buildSearchQuery({ model, params })))
+      .query((qb) => qb.where(buildSearchQuery({ model, params })))
       .query(buildQuery({ model, filters }))
       .fetchAll({ withRelated: populate })
-      .then(results => results.toJSON());
+      .then((results) => results.toJSON());
   }
 
   function countSearch(params) {
-    const filters = convertRestQueryParams(_.omit(params, ['_q', '_sort', '_limit', '_start']));
+    const countParams = omit(['_q'], params);
+    const filters = pickCountFilters(convertRestQueryParams(countParams));
 
     return model
-      .query(qb => qb.where(buildSearchQuery({ model, params })))
+      .query((qb) => qb.where(buildSearchQuery({ model, params })))
       .query(buildQuery({ model, filters }))
       .count()
       .then(Number);
@@ -207,7 +243,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return strapi
         .query(componentModel.uid)
         .create(value, { transacting })
-        .then(component => {
+        .then((component) => {
           return joinModel.forge().save(
             {
               [foreignKey]: entry.id,
@@ -311,7 +347,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
             value,
             { transacting }
           )
-          .then(component => {
+          .then((component) => {
             return joinModel
               .where({
                 [foreignKey]: entry.id,
@@ -331,7 +367,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
       return strapi
         .query(componentModel.uid)
         .create(value, { transacting })
-        .then(component => {
+        .then((component) => {
           return joinModel.forge().save(
             {
               [foreignKey]: entry.id,
@@ -423,7 +459,6 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         }
       }
     }
-    return;
   }
 
   async function deleteDynamicZoneOldComponents(entry, values, { key, joinModel, transacting }) {
@@ -441,13 +476,13 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }, []);
 
     const allIds = await joinModel
-      .query(qb => {
+      .query((qb) => {
         qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
       })
       .fetchAll({ transacting })
-      .map(el => {
+      .map((el) => {
         const componentKey = Object.keys(strapi.components).find(
-          key => strapi.components[key].collectionName === el.get('component_type')
+          (key) => strapi.components[key].collectionName === el.get('component_type')
         );
 
         return {
@@ -456,9 +491,9 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         };
       });
 
-    // verify the provided ids are realted to this entity.
+    // verify the provided ids are related to this entity.
     idsToKeep.forEach(({ id, component }) => {
-      if (!allIds.find(el => el.id === id && el.component.uid === component.uid)) {
+      if (!allIds.find((el) => el.id === id && el.component.uid === component.uid)) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
         );
@@ -468,7 +503,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     });
 
     const idsToDelete = allIds.reduce((acc, { id, component }) => {
-      if (!idsToKeep.find(el => el.id === id && el.component.uid === component.uid)) {
+      if (!idsToKeep.find((el) => el.id === id && el.component.uid === component.uid)) {
         acc.push({
           id,
           component,
@@ -479,11 +514,11 @@ module.exports = function createQueryBuilder({ model, strapi }) {
 
     if (idsToDelete.length > 0) {
       await joinModel
-        .query(qb => {
+        .query((qb) => {
           qb.where('field', key);
-          qb.where(qb => {
+          qb.where((qb) => {
             idsToDelete.forEach(({ id, component }) => {
-              qb.orWhere(qb => {
+              qb.orWhere((qb) => {
                 qb.where('component_id', id).andWhere('component_type', component.collectionName);
               });
             });
@@ -507,8 +542,8 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const componentArr = Array.isArray(componentValue) ? componentValue : [componentValue];
 
     const idsToKeep = componentArr
-      .filter(el => _.has(el, componentModel.primaryKey))
-      .map(el => el[componentModel.primaryKey].toString());
+      .filter((el) => _.has(el, componentModel.primaryKey))
+      .map((el) => el[componentModel.primaryKey].toString());
 
     const allIds = await joinModel
       .where({
@@ -516,10 +551,10 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         field: key,
       })
       .fetchAll({ transacting })
-      .map(el => el.get('component_id').toString());
+      .map((el) => el.get('component_id').toString());
 
-    // verify the provided ids are realted to this entity.
-    idsToKeep.forEach(id => {
+    // verify the provided ids are related to this entity.
+    idsToKeep.forEach((id) => {
       if (!allIds.includes(id)) {
         const err = new Error(
           `Some of the provided components in ${key} are not related to the entity`
@@ -532,7 +567,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     const idsToDelete = _.difference(allIds, idsToKeep);
     if (idsToDelete.length > 0) {
       await joinModel
-        .query(qb => qb.whereIn('component_id', idsToDelete).andWhere('field', key))
+        .query((qb) => qb.whereIn('component_id', idsToDelete).andWhere('field', key))
         .destroy({ transacting, require: false });
 
       await strapi
@@ -563,7 +598,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
               field: key,
             })
             .fetchAll({ transacting })
-            .map(el => el.get('component_id'));
+            .map((el) => el.get('component_id'));
 
           await strapi
             .query(componentModel.uid)
@@ -586,7 +621,7 @@ module.exports = function createQueryBuilder({ model, strapi }) {
               field: key,
             })
             .fetchAll({ transacting })
-            .map(el => ({
+            .map((el) => ({
               id: el.get('component_id'),
               componentType: el.get('component_type'),
             }));
@@ -595,12 +630,12 @@ module.exports = function createQueryBuilder({ model, strapi }) {
             const { uid, collectionName } = strapi.components[compo];
             const model = strapi.query(uid);
 
-            const toDelete = componentJoins.filter(el => el.componentType === collectionName);
+            const toDelete = componentJoins.filter((el) => el.componentType === collectionName);
 
             if (toDelete.length > 0) {
               await model.delete(
                 {
-                  [`${model.primaryKey}_in`]: toDelete.map(el => el.id),
+                  [`${model.primaryKey}_in`]: toDelete.map((el) => el.id),
                 },
                 { transacting }
               );
@@ -620,15 +655,55 @@ module.exports = function createQueryBuilder({ model, strapi }) {
     }
   }
 
+  async function fetchRelationCounters(attribute, entitiesIds = []) {
+    const assoc = model.associations.find((assoc) => assoc.alias === attribute);
+    const assocModel = strapi.db.getModelByAssoc(assoc);
+    const knex = strapi.connections[model.connection];
+    const targetAttribute = assocModel.attributes[assoc.via];
+
+    switch (assoc.nature) {
+      case 'oneToMany': {
+        return knex
+          .select()
+          .column({ id: assoc.via, count: knex.raw('count(*)') })
+          .from(assocModel.collectionName)
+          .whereIn(assoc.via, entitiesIds)
+          .groupBy(assoc.via);
+      }
+      case 'manyWay': {
+        const column = `${singular(model.collectionName)}_${model.primaryKey}`;
+        return knex
+          .select()
+          .column({ id: column, count: knex.raw('count(*)') })
+          .from(assoc.tableCollectionName)
+          .whereIn(column, entitiesIds)
+          .groupBy(column);
+      }
+      case 'manyToMany': {
+        const column = `${targetAttribute.attribute}_${targetAttribute.column}`;
+        return knex
+          .select()
+          .column({ id: column, count: knex.raw('count(*)') })
+          .from(assoc.tableCollectionName)
+          .whereIn(column, entitiesIds)
+          .groupBy(column);
+      }
+      default: {
+        return [];
+      }
+    }
+  }
+
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,
     countSearch,
+    fetchRelationCounters,
   };
 };
 
@@ -637,53 +712,57 @@ module.exports = function createQueryBuilder({ model, strapi }) {
  * @param {*} model
  * @param {*} params
  */
-const buildSearchQuery = ({ model, params }) => qb => {
-  const query = params._q;
+const buildSearchQuery =
+  ({ model, params }) =>
+  (qb) => {
+    const query = params._q;
 
-  const associations = model.associations.map(x => x.alias);
-  const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext'];
-  const numberTypes = ['biginteger', 'integer', 'decimal', 'float'];
+    const associations = model.associations.map((x) => x.alias);
+    const stringTypes = ['string', 'text', 'uid', 'email', 'enumeration', 'richtext'];
+    const numberTypes = ['biginteger', 'integer', 'decimal', 'float'];
 
-  const searchColumns = Object.keys(model._attributes)
-    .filter(attribute => !associations.includes(attribute))
-    .filter(attribute => stringTypes.includes(model._attributes[attribute].type));
+    const searchColumns = Object.keys(model._attributes)
+      .filter((attribute) => !associations.includes(attribute))
+      .filter((attribute) => stringTypes.includes(model._attributes[attribute].type))
+      .filter((attribute) => model._attributes[attribute].searchable !== false);
 
-  if (!_.isNaN(_.toNumber(query))) {
-    const numberColumns = Object.keys(model._attributes)
-      .filter(attribute => !associations.includes(attribute))
-      .filter(attribute => numberTypes.includes(model._attributes[attribute].type));
-    searchColumns.push(...numberColumns);
-  }
+    if (!_.isNaN(_.toNumber(query))) {
+      const numberColumns = Object.keys(model._attributes)
+        .filter((attribute) => !associations.includes(attribute))
+        .filter((attribute) => numberTypes.includes(model._attributes[attribute].type))
+        .filter((attribute) => model._attributes[attribute].searchable !== false);
+      searchColumns.push(...numberColumns);
+    }
 
-  if ([...numberTypes, ...stringTypes].includes(model.primaryKeyType)) {
-    searchColumns.push(model.primaryKey);
-  }
+    if ([...numberTypes, ...stringTypes].includes(model.primaryKeyType)) {
+      searchColumns.push(model.primaryKey);
+    }
 
-  // Search in columns with text using index.
-  switch (model.client) {
-    case 'pg':
-      searchColumns.forEach(attr =>
-        qb.orWhereRaw(
-          `"${model.collectionName}"."${attr}"::text ILIKE ?`,
-          `%${escapeQuery(query, '*%\\')}%`
-        )
-      );
-      break;
-    case 'sqlite3':
-      searchColumns.forEach(attr =>
-        qb.orWhereRaw(
-          `"${model.collectionName}"."${attr}" LIKE ? ESCAPE '\\'`,
-          `%${escapeQuery(query, '*%\\')}%`
-        )
-      );
-      break;
-    case 'mysql':
-      searchColumns.forEach(attr =>
-        qb.orWhereRaw(
-          `\`${model.collectionName}\`.\`${attr}\` LIKE ?`,
-          `%${escapeQuery(query, '*%\\')}%`
-        )
-      );
-      break;
-  }
-};
+    // Search in columns with text using index.
+    switch (model.client) {
+      case 'pg':
+        searchColumns.forEach((attr) =>
+          qb.orWhereRaw(
+            `"${model.collectionName}"."${attr}"::text ILIKE ?`,
+            `%${escapeQuery(query, '*%\\')}%`
+          )
+        );
+        break;
+      case 'sqlite3':
+        searchColumns.forEach((attr) =>
+          qb.orWhereRaw(
+            `"${model.collectionName}"."${attr}" LIKE ? ESCAPE '\\'`,
+            `%${escapeQuery(query, '*%\\')}%`
+          )
+        );
+        break;
+      case 'mysql':
+        searchColumns.forEach((attr) =>
+          qb.orWhereRaw(
+            `\`${model.collectionName}\`.\`${attr}\` LIKE ?`,
+            `%${escapeQuery(query, '*%\\')}%`
+          )
+        );
+        break;
+    }
+  };

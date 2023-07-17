@@ -1,6 +1,8 @@
+'use strict';
+
 /**
  * Converts the standard Strapi REST query params to a moe usable format for querying
- * You can read more here: https://strapi.io/documentation/3.0.0-beta.x/guides/filters.html
+ * You can read more here: https://strapi.akemona.com/documentation/developer-docs/latest/developer-resources/content-api/content-api.html#filters
  */
 
 const _ = require('lodash');
@@ -8,8 +10,8 @@ const {
   constants: { DP_PUB_STATES },
 } = require('./content-types');
 
-const BOOLEAN_OPERATORS = ['or'];
-const QUERY_OPERATORS = ['_where', '_or'];
+const BOOLEAN_OPERATORS = ['or', 'and'];
+const QUERY_OPERATORS = ['_where', '_or', '_and'];
 
 /**
  * Global converter
@@ -45,7 +47,10 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
     Object.assign(finalParams, convertPublicationStateParams(params._publicationState));
   }
 
-  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState']);
+  const whereParams = convertExtraRootParams(
+    _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState'])
+  );
+
   const whereClauses = [];
 
   if (_.keys(whereParams).length > 0) {
@@ -62,17 +67,35 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
 };
 
 /**
+ * Convert params prefixed with _ by removing the prefix after we have handle the internal params
+ * NOTE: This is only a temporary patch for v3 to handle extra params coming from plugins
+ * @param {object} params
+ * @returns {object}
+ */
+const convertExtraRootParams = (params) => {
+  return Object.entries(params).reduce((acc, [key, value]) => {
+    if (_.startsWith(key, '_') && !QUERY_OPERATORS.includes(key)) {
+      acc[key.slice(1)] = value;
+    } else {
+      acc[key] = value;
+    }
+
+    return acc;
+  }, {});
+};
+
+/**
  * Sort query parser
  * @param {string} sortQuery - ex: id:asc,price:desc
  */
-const convertSortQueryParams = sortQuery => {
+const convertSortQueryParams = (sortQuery) => {
   if (typeof sortQuery !== 'string') {
     throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
   }
 
   const sortKeys = [];
 
-  sortQuery.split(',').forEach(part => {
+  sortQuery.split(',').forEach((part) => {
     // split field and order param with default order to ascending
     const [field, order = 'asc'] = part.split(':');
 
@@ -96,7 +119,7 @@ const convertSortQueryParams = sortQuery => {
  * Start query parser
  * @param {string} startQuery - ex: id:asc,price:desc
  */
-const convertStartQueryParams = startQuery => {
+const convertStartQueryParams = (startQuery) => {
   const startAsANumber = _.toNumber(startQuery);
 
   if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
@@ -112,7 +135,7 @@ const convertStartQueryParams = startQuery => {
  * Limit query parser
  * @param {string} limitQuery - ex: id:asc,price:desc
  */
-const convertLimitQueryParams = limitQuery => {
+const convertLimitQueryParams = (limitQuery) => {
   const limitAsANumber = _.toNumber(limitQuery);
 
   if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
@@ -128,7 +151,7 @@ const convertLimitQueryParams = limitQuery => {
  * publicationState query parser
  * @param {string} publicationState - eg: 'live', 'preview'
  */
-const convertPublicationStateParams = publicationState => {
+const convertPublicationStateParams = (publicationState) => {
   if (!DP_PUB_STATES.includes(publicationState)) {
     throw new Error(
       `convertPublicationStateParams expected a value from: ${DP_PUB_STATES.join(
@@ -160,7 +183,7 @@ const VALID_REST_OPERATORS = [
 /**
  * Parse where params
  */
-const convertWhereParams = whereParams => {
+const convertWhereParams = (whereParams) => {
   let finalWhere = [];
 
   if (Array.isArray(whereParams)) {
@@ -169,11 +192,12 @@ const convertWhereParams = whereParams => {
     }, []);
   }
 
-  Object.keys(whereParams).forEach(whereClause => {
-    const { field, operator = 'eq', value } = convertWhereClause(
-      whereClause,
-      whereParams[whereClause]
-    );
+  Object.keys(whereParams).forEach((whereClause) => {
+    const {
+      field,
+      operator = 'eq',
+      value,
+    } = convertWhereClause(whereClause, whereParams[whereClause]);
 
     finalWhere.push({
       field,

@@ -1,7 +1,10 @@
 {
-  "name": "strapi-plugin-email",
-  "version": "3.3.3",
-  "description": "This is the description of the plugin.",
+  "name": "@akemona-org/strapi-plugin-email",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "3.12.4",
+  "description": "Easily configure your Strapi application to send emails.",
   "strapi": {
     "name": "Email",
     "icon": "paper-plane",
@@ -12,34 +15,34 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "lodash": "4.17.19",
-    "strapi-provider-email-sendmail": "3.3.3",
-    "strapi-utils": "3.3.3"
+    "@akemona-org/strapi-provider-email-sendmail": "3.12.4",
+    "@akemona-org/strapi-utils": "3.12.4",
+    "lodash": "4.17.21"
   },
   "devDependencies": {
-    "rimraf": "3.0.2",
-    "strapi-helper-plugin": "3.3.3"
+    "@akemona-org/strapi-helper-plugin": "3.12.4",
+    "rimraf": "4.1.0"
   },
   "author": {
-    "name": "Strapi team",
-    "email": "hi@strapi.io",
-    "url": "http://strapi.io"
+    "name": "Akemona team",
+    "email": "strapi@akemona.com",
+    "url": "https://strapi.akemona.com"
   },
   "maintainers": [
     {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "name": "Akemona team",
+      "email": "strapi@akemona.com",
+      "url": "https://strapi.akemona.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/akemona/strapi.git"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "gitHead": "57095241bb8bc011c97ecbc8c7274b674b01cd0f"
 }

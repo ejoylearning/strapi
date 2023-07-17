@@ -7,10 +7,12 @@
 
 // Setup the strapi functioon global variable
 
+import '@testing-library/jest-dom/extend-expect';
+
 const React = require('react');
 const hoistNonReactStatics = require('hoist-non-react-statics');
 
-const hoc = () => WrappedComponent => {
+const hoc = () => (WrappedComponent) => {
   class HocInjector extends React.Component {
     static WrappedComponent = WrappedComponent;
 

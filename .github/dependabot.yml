@@ -7,3 +7,4 @@ updates:
     versioning-strategy: increase
     reviewers:
       - strapi/maintainers
+    open-pull-requests-limit: 5

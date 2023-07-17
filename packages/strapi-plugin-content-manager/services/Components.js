@@ -1,69 +1,84 @@
 'use strict';
 
-const _ = require('lodash');
+const { has, isNil, mapValues } = require('lodash/fp');
 
+const { getService } = require('../utils');
 const storeUtils = require('./utils/store');
+const createConfigurationService = require('./configuration');
 
-const uidToStoreKey = uid => `components::${uid}`;
+const STORE_KEY_PREFIX = 'components';
+
+const configurationService = createConfigurationService({
+  storeUtils,
+  isComponent: true,
+  prefix: STORE_KEY_PREFIX,
+  getModels() {
+    const { toContentManagerModel } = getService('data-mapper');
+
+    return mapValues(toContentManagerModel, strapi.components);
+  },
+});
 
 module.exports = {
-  async getComponentInformations(uid) {
-    const ctService = strapi.plugins['content-manager'].services.contenttypes;
+  findAllComponents() {
+    const { toContentManagerModel } = getService('data-mapper');
+
+    return Object.values(strapi.components).map(toContentManagerModel);
+  },
+
+  findComponent(uid) {
+    const { toContentManagerModel } = getService('data-mapper');
 
     const component = strapi.components[uid];
 
-    const configurations = await this.getConfiguration(uid);
+    return isNil(component) ? component : toContentManagerModel(component);
+  },
+
+  // configuration
+
+  async findConfiguration(component) {
+    const configuration = await configurationService.getConfiguration(component.uid);
 
     return {
-      component: {
-        uid,
-        category: component.category,
-        schema: ctService.formatContentTypeSchema(component),
-        ...configurations,
-      },
-      components: await this.getComponentsSchemas(component),
+      uid: component.uid,
+      category: component.categoru,
+      ...configuration,
     };
   },
 
-  async getComponentsSchemas(model) {
+  async updateConfiguration(component, newConfiguration) {
+    await configurationService.setConfiguration(component.uid, newConfiguration);
+
+    return this.findConfiguration(component);
+  },
+
+  async findComponentsConfigurations(model) {
     const componentsMap = {};
 
+    const getComponentConfigurations = async (uid) => {
+      const component = this.findComponent(uid);
+
+      if (has(uid, componentsMap)) return;
+
+      const componentConfiguration = await this.findConfiguration(component);
+      const componentsConfigurations = await this.findComponentsConfigurations(component);
+
+      Object.assign(componentsMap, {
+        [uid]: componentConfiguration,
+        ...componentsConfigurations,
+      });
+    };
+
     for (const key in model.attributes) {
-      const attr = model.attributes[key];
+      const attribute = model.attributes[key];
 
-      if (!['component', 'dynamiczone'].includes(attr.type)) continue;
-
-      if (attr.type === 'component') {
-        const compo = strapi.components[attr.component];
-
-        if (_.has(componentsMap, compo.uid)) continue;
-
-        const { component, components } = await this.getComponentInformations(
-          compo.uid
-        );
-
-        Object.assign(componentsMap, {
-          [compo.uid]: component,
-          ...components,
-        });
+      if (attribute.type === 'component') {
+        await getComponentConfigurations(attribute.component);
       }
 
-      if (attr.type === 'dynamiczone') {
-        const componentKeys = attr.components;
-
-        for (const componentKey of componentKeys) {
-          const compo = strapi.components[componentKey];
-
-          if (_.has(componentsMap, compo.uid)) continue;
-
-          const { component, components } = await this.getComponentInformations(
-            compo.uid
-          );
-
-          Object.assign(componentsMap, {
-            [compo.uid]: component,
-            ...components,
-          });
+      if (attribute.type === 'dynamiczone') {
+        for (const componentUid of attribute.components) {
+          await getComponentConfigurations(componentUid);
         }
       }
     }
@@ -71,26 +86,7 @@ module.exports = {
     return componentsMap;
   },
 
-  getConfiguration(uid) {
-    const storeKey = uidToStoreKey(uid);
-    return storeUtils.getModelConfiguration(storeKey);
-  },
-
-  setConfiguration(uid, input) {
-    const { settings, metadatas, layouts } = input;
-
-    const storeKey = uidToStoreKey(uid);
-    return storeUtils.setModelConfiguration(storeKey, {
-      uid,
-      isComponent: true,
-      settings,
-      metadatas,
-      layouts,
-    });
-  },
-
-  deleteConfiguration(uid) {
-    const storeKey = uidToStoreKey(uid);
-    return storeUtils.deleteKey(storeKey);
+  syncConfigurations() {
+    return configurationService.syncConfigurations();
   },
 };

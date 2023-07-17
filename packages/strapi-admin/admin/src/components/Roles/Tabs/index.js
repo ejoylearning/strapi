@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import { LoadingIndicator } from 'strapi-helper-plugin';
+import { LoadingIndicator } from '@akemona-org/strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 
 import TabsWrapper from './TabsWrapper';
@@ -10,8 +10,9 @@ import Tab from './Tab';
 const Tabs = ({ children, isLoading, tabsLabel }) => {
   const { formatMessage } = useIntl();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const selectedChild = React.Children.toArray(children)[selectedTabIndex];
 
-  const handleSelectedTab = index => {
+  const handleSelectedTab = (index) => {
     if (index !== selectedTabIndex) {
       setSelectedTabIndex(index);
     }
@@ -38,7 +39,7 @@ const Tabs = ({ children, isLoading, tabsLabel }) => {
               </Tab>
             ))}
           </Flex>
-          {children[selectedTabIndex]}
+          {selectedChild}
         </>
       )}
     </TabsWrapper>

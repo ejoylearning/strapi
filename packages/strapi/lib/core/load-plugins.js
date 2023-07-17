@@ -19,7 +19,7 @@ module.exports = async ({ dir, config }) => {
   if (pluginsIntersection.length > 0) {
     throw new Error(
       `You have some local plugins with the same name as npm installed plugins:\n${pluginsIntersection
-        .map(p => `- ${p}`)
+        .map((p) => `- ${p}`)
         .join('\n')}`
     );
   }
@@ -48,11 +48,11 @@ const loadPlugins = async ({ installedPlugins, config }) => {
   let plugins = {};
 
   for (let plugin of installedPlugins) {
-    const pluginPath = findPackagePath(`strapi-plugin-${plugin}`);
+    const pluginPath = findPackagePath(`@akemona-org/strapi-plugin-${plugin}`);
 
     const files = await loadFiles(
       pluginPath,
-      '{!(config|node_modules|test)/*.*(js|json),package.json}'
+      '{!(config|node_modules|tests)/*.*(js|json),package.json}'
     );
 
     const { config: pluginConfig } = await loadConfig(pluginPath);

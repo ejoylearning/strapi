@@ -1,10 +1,10 @@
 import { fromJS } from 'immutable';
+import { getMaxTempKey } from '../../utils';
 
 const initialState = fromJS({
   componentsDataStructure: {},
   contentTypeDataStructure: {},
   formErrors: {},
-  isLoading: true,
   initialData: {},
   modifiedData: {},
   shouldCheckErrors: false,
@@ -21,11 +21,10 @@ const reducer = (state, action) => {
       });
     case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
       return state
-        .updateIn(['modifiedData', ...action.keys], list => {
-          const defaultDataStructure = state.getIn([
-            'componentsDataStructure',
-            action.componentUid,
-          ]);
+        .updateIn(['modifiedData', ...action.keys], (list) => {
+          const defaultDataStructure = state
+            .getIn(['componentsDataStructure', action.componentUid])
+            .set('__temp_key__', getMaxTempKey(list ? list.toJS() : []) + 1);
 
           if (list) {
             return list.push(defaultDataStructure);
@@ -33,7 +32,7 @@ const reducer = (state, action) => {
 
           return fromJS([defaultDataStructure]);
         })
-        .update('shouldCheckErrors', v => {
+        .update('shouldCheckErrors', (v) => {
           if (action.shouldCheckErrors === true) {
             return !v;
           }
@@ -43,7 +42,7 @@ const reducer = (state, action) => {
     }
     case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
       return state
-        .updateIn(['modifiedData', ...action.keys], list => {
+        .updateIn(['modifiedData', ...action.keys], (list) => {
           const defaultDataStructure = state
             .getIn(['componentsDataStructure', action.componentUid])
             .set('__component', action.componentUid);
@@ -55,7 +54,7 @@ const reducer = (state, action) => {
           return fromJS([defaultDataStructure]);
         })
         .update('modifiedDZName', () => action.keys[0])
-        .update('shouldCheckErrors', v => {
+        .update('shouldCheckErrors', (v) => {
           if (action.shouldCheckErrors === true) {
             return !v;
           }
@@ -63,8 +62,8 @@ const reducer = (state, action) => {
           return v;
         });
     case 'ADD_RELATION':
-      return state.updateIn(['modifiedData', ...action.keys], list => {
-        if (!action.value) {
+      return state.updateIn(['modifiedData', ...action.keys], (list) => {
+        if (!Array.isArray(action.value) || !action.value.length) {
           return list;
         }
 
@@ -76,13 +75,16 @@ const reducer = (state, action) => {
 
         return fromJS([el]);
       });
-    case 'GET_DATA_SUCCEEDED':
+    case 'INIT_FORM': {
       return state
-        .update('initialData', () => fromJS(action.data))
-        .update('modifiedData', () => fromJS(action.data))
-        .update('isLoading', () => false);
+        .update('formErrors', () => fromJS({}))
+        .update('initialData', () => fromJS(action.initialValues))
+        .update('modifiedData', () => fromJS(action.initialValues))
+        .update('modifiedDZName', () => null)
+        .update('shouldCheckErrors', () => false);
+    }
     case 'MOVE_COMPONENT_FIELD':
-      return state.updateIn(['modifiedData', ...action.pathToComponent], list => {
+      return state.updateIn(['modifiedData', ...action.pathToComponent], (list) => {
         return list
           .delete(action.dragIndex)
           .insert(
@@ -92,14 +94,14 @@ const reducer = (state, action) => {
       });
     case 'MOVE_COMPONENT_UP':
       return state
-        .update('shouldCheckErrors', v => {
+        .update('shouldCheckErrors', (v) => {
           if (action.shouldCheckErrors) {
             return !v;
           }
 
           return v;
         })
-        .updateIn(['modifiedData', action.dynamicZoneName], list => {
+        .updateIn(['modifiedData', action.dynamicZoneName], (list) => {
           return list
             .delete(action.currentIndex)
             .insert(
@@ -109,14 +111,14 @@ const reducer = (state, action) => {
         });
     case 'MOVE_COMPONENT_DOWN':
       return state
-        .update('shouldCheckErrors', v => {
+        .update('shouldCheckErrors', (v) => {
           if (action.shouldCheckErrors) {
             return !v;
           }
 
           return v;
         })
-        .updateIn(['modifiedData', action.dynamicZoneName], list => {
+        .updateIn(['modifiedData', action.dynamicZoneName], (list) => {
           return list
             .delete(action.currentIndex)
             .insert(
@@ -125,7 +127,7 @@ const reducer = (state, action) => {
             );
         });
     case 'MOVE_FIELD':
-      return state.updateIn(['modifiedData', ...action.keys], list => {
+      return state.updateIn(['modifiedData', ...action.keys], (list) => {
         return list.delete(action.dragIndex).insert(action.overIndex, list.get(action.dragIndex));
       });
     case 'ON_CHANGE': {
@@ -155,7 +157,7 @@ const reducer = (state, action) => {
     }
     case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
       return state
-        .update('shouldCheckErrors', v => {
+        .update('shouldCheckErrors', (v) => {
           if (action.shouldCheckErrors) {
             return !v;
           }
@@ -175,7 +177,7 @@ const reducer = (state, action) => {
       const componentPathToRemove = ['modifiedData', ...action.keys];
 
       return state
-        .update('shouldCheckErrors', v => {
+        .update('shouldCheckErrors', (v) => {
           const hasErrors = state.get('formErrors').keySeq().size > 0;
 
           if (hasErrors) {
@@ -186,48 +188,19 @@ const reducer = (state, action) => {
         })
         .deleteIn(componentPathToRemove);
     }
-
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);
-    case 'RESET_DATA':
-      return state
-        .update('modifiedData', () => state.get('initialData'))
-        .update('formErrors', () => fromJS({}));
-
-    case 'RESET_PROPS':
-      return initialState;
     case 'SET_DEFAULT_DATA_STRUCTURES':
       return state
         .update('componentsDataStructure', () => fromJS(action.componentsDataStructure))
         .update('contentTypeDataStructure', () => fromJS(action.contentTypeDataStructure));
-    case 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE':
-      return state
-        .update('isLoading', () => false)
-        .update('initialData', () => fromJS(action.contentTypeDataStructure))
-        .update('modifiedData', () => fromJS(action.contentTypeDataStructure));
-    case 'SET_ERRORS':
+    case 'SET_FORM_ERRORS': {
       return state
         .update('modifiedDZName', () => null)
         .update('formErrors', () => fromJS(action.errors));
-    case 'SUBMIT_ERRORS':
-    case 'PUBLISH_ERRORS':
-      return state
-        .update('formErrors', () => fromJS(action.errors))
-        .update('shouldShowLoadingState', () => false);
-    case 'UNPUBLISH_SUCCESS':
-    case 'PUBLISH_SUCCESS':
-      return state
-        .update('isLoading', () => false)
-        .update('modifiedData', () => fromJS(action.data))
-        .update('initialData', () => fromJS(action.data));
-    case 'SUBMIT_SUCCESS':
-    case 'DELETE_SUCCEEDED':
-      return state
-        .update('isLoading', () => false)
-        .update('formErrors', () => fromJS({}))
-        .update('initialData', () => state.get('modifiedData'));
+    }
     case 'TRIGGER_FORM_VALIDATION':
-      return state.update('shouldCheckErrors', v => {
+      return state.update('shouldCheckErrors', (v) => {
         const hasErrors = state.get('formErrors').keySeq().size > 0;
 
         if (hasErrors) {

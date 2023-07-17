@@ -4,8 +4,8 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
+const { nameToSlug, nameToCollectionName } = require('@akemona-org/strapi-utils');
 const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
-const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
 
@@ -66,7 +66,7 @@ module.exports = function createComponentBuilder() {
       const defaultCollectionName = `${nameToCollectionName(pluralize(infos.name))}`;
 
       // support self referencing content type relation
-      Object.keys(infos.attributes).forEach(key => {
+      Object.keys(infos.attributes).forEach((key) => {
         const { target } = infos.attributes[key];
         if (target === '__self__') {
           infos.attributes[key].target = uid;
@@ -86,9 +86,10 @@ module.exports = function createComponentBuilder() {
           timestamps: true,
           draftAndPublish: infos.draftAndPublish || false,
         })
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
-      Object.keys(infos.attributes).forEach(key => {
+      Object.keys(infos.attributes).forEach((key) => {
         const attribute = infos.attributes[key];
 
         if (isRelation(attribute)) {
@@ -126,7 +127,7 @@ module.exports = function createComponentBuilder() {
       const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
 
       // remove old relations
-      deletedKeys.forEach(key => {
+      deletedKeys.forEach((key) => {
         const attribute = oldAttributes[key];
 
         // if the old relation has a target attribute. we need to remove it
@@ -135,7 +136,7 @@ module.exports = function createComponentBuilder() {
         }
       });
 
-      remainingKeys.forEach(key => {
+      remainingKeys.forEach((key) => {
         const oldAttribute = oldAttributes[key];
         const newAttribute = newAttributes[key];
 
@@ -157,7 +158,8 @@ module.exports = function createComponentBuilder() {
             this.unsetRelation(oldAttribute);
           }
 
-          newAttribute.autoPopulate = newAttribute.autoPopulate || oldAttribute.autoPopulate;
+          // keep extra options that were set manually on oldAttribute
+          _.defaults(newAttribute, oldAttribute);
 
           return this.setRelation({
             key,
@@ -169,7 +171,7 @@ module.exports = function createComponentBuilder() {
       });
 
       // add new relations
-      newKeys.forEach(key => {
+      newKeys.forEach((key) => {
         const attribute = newAttributes[key];
 
         if (isRelation(attribute)) {
@@ -188,6 +190,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
         .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
@@ -198,11 +201,11 @@ module.exports = function createComponentBuilder() {
         throw new Error('contentType.notFound');
       }
 
-      this.components.forEach(compo => {
+      this.components.forEach((compo) => {
         compo.removeContentType(uid);
       });
 
-      this.contentTypes.forEach(ct => {
+      this.contentTypes.forEach((ct) => {
         ct.removeContentType(uid);
       });
 
@@ -224,6 +227,7 @@ const generateRelation = ({ key, attribute, plugin, modelName, targetAttribute =
     plugin,
     columnName: attribute.targetColumnName || undefined,
     autoPopulate: targetAttribute.autoPopulate,
+    private: targetAttribute.private || undefined,
   };
 
   switch (attribute.nature) {

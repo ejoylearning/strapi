@@ -5,6 +5,7 @@
  */
 
 const pino = require('pino');
+const pretty = require('pino-pretty');
 const _ = require('lodash');
 
 const logLevels = Object.keys(pino.levels.values);
@@ -39,24 +40,21 @@ function getBool(envVar, defaultValue) {
 
 const loggerConfig = {
   level: getLogLevel(),
-  timestamp: getBool(process.env.STRAPI_LOG_TIMESTAMP, false),
-  // prettyPrint: getBool(process.env.STRAPI_LOG_PRETTY_PRINT, true),
+  timestamp: pino.stdTimeFunctions.isoTime,
   forceColor: getBool(process.env.STRAPI_LOG_FORCE_COLOR, true),
 };
 
-const pretty = pino.pretty({
-  formatter: (logs, options) => {
-    return `${options.asColoredText(
-      { level: 10 },
-      `[${new Date().toISOString()}]`
-    )} ${options.prefix.toLowerCase()} ${logs.stack ? logs.stack : logs.msg}`;
-  },
-});
+const nodeEnv = process.env.NODE_ENV ? process.env.NODE_ENV.toLowerCase() : 'development';
 
-pretty.pipe(process.stdout);
-
-const logger = getBool(process.env.STRAPI_LOG_PRETTY_PRINT, true)
-  ? pino(loggerConfig, pretty)
+// * NOTE: pretty option does not work with pm2 - use `cat /log-path/file.log | pino-pretty` to view
+const logger = getBool(process.env.STRAPI_LOG_PRETTY_PRINT, nodeEnv === 'development')
+  ? pino(
+      pretty({
+        colorize: true,
+        translateTime: 'SYS:standard',
+        ignore: 'pid,hostname',
+      })
+    )
   : pino(loggerConfig);
 
 module.exports = logger;

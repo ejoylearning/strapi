@@ -1,22 +1,20 @@
 'use strict';
 
-// required first because it loads env files.
-const loadConfiguration = require('../core/app-configuration');
-
 const path = require('path');
 const cluster = require('cluster');
 const fs = require('fs-extra');
 const chokidar = require('chokidar');
 const execa = require('execa');
 
-const { logger } = require('strapi-utils');
+const { logger } = require('@akemona-org/strapi-utils');
+const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
 
 /**
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin, browser }) {
+module.exports = async function ({ build, watchAdmin, polling, browser }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
 
@@ -79,9 +77,10 @@ module.exports = async function({ build, watchAdmin, browser }) {
         dir,
         strapiInstance,
         watchIgnoreFiles: adminWatchIgnoreFiles,
+        polling,
       });
 
-      process.on('message', message => {
+      process.on('message', (message) => {
         switch (message) {
           case 'isKilled':
             strapiInstance.server.destroy(() => {
@@ -108,7 +107,7 @@ module.exports = async function({ build, watchAdmin, browser }) {
  * @param {Strapi} options.strapi - Strapi instance
  * @param {array} options.watchIgnoreFiles - Array of custom file paths that should not be watched
  */
-function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
+function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
   const restart = () => {
     if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
       strapiInstance.reload.isReloading = true;
@@ -118,11 +117,12 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
 
   const watcher = chokidar.watch(dir, {
     ignoreInitial: true,
+    usePolling: polling,
     ignored: [
       /(^|[/\\])\../, // dot files
       /tmp/,
-      '**/admin',
-      '**/admin/**',
+      'admin',
+      'admin/**',
       'extensions/**/admin',
       'extensions/**/admin/**',
       '**/documentation',
@@ -140,15 +140,15 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
   });
 
   watcher
-    .on('add', path => {
+    .on('add', (path) => {
       strapiInstance.log.info(`File created: ${path}`);
       restart();
     })
-    .on('change', path => {
+    .on('change', (path) => {
       strapiInstance.log.info(`File changed: ${path}`);
       restart();
     })
-    .on('unlink', path => {
+    .on('unlink', (path) => {
       strapiInstance.log.info(`File deleted: ${path}`);
       restart();
     });

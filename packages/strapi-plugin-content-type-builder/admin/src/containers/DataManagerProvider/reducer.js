@@ -2,6 +2,7 @@ import { fromJS, OrderedMap } from 'immutable';
 import { get, has } from 'lodash';
 import makeUnique from '../../utils/makeUnique';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
+import * as actions from './constants';
 
 const initialState = fromJS({
   components: {},
@@ -17,7 +18,7 @@ const initialState = fromJS({
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
 
-const getOppositeNature = originalNature => {
+const getOppositeNature = (originalNature) => {
   if (originalNature === 'manyToOne') {
     return 'oneToMany';
   }
@@ -51,7 +52,7 @@ const addComponentsToState = (state, componentToAddUid, objToUpdate) => {
   );
 
   // We need to add the nested components to the modifiedData.components as well
-  nestedComponents.forEach(componentUid => {
+  nestedComponents.forEach((componentUid) => {
     const isTemporary = state.getIn(['components', componentUid, 'isTemporary']) || false;
     const hasNestedComponentAlreadyBeenAdded =
       state.getIn(['modifiedData', 'components', componentUid]) !== undefined;
@@ -65,9 +66,9 @@ const addComponentsToState = (state, componentToAddUid, objToUpdate) => {
   return newObj;
 };
 
-const reducer = (state, action) => {
+const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'ADD_ATTRIBUTE': {
+    case actions.ADD_ATTRIBUTE: {
       const {
         attributeToSet: { name, ...rest },
         forTarget,
@@ -83,7 +84,7 @@ const reducer = (state, action) => {
         .updateIn(['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', name], () => {
           return fromJS(rest);
         })
-        .updateIn(['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'], obj => {
+        .updateIn(['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'], (obj) => {
           const type = get(rest, 'type', 'relation');
           const target = get(rest, 'target', null);
           const nature = get(rest, 'nature', null);
@@ -116,7 +117,7 @@ const reducer = (state, action) => {
 
           return obj;
         })
-        .updateIn(['modifiedData', 'components'], existingCompos => {
+        .updateIn(['modifiedData', 'components'], (existingCompos) => {
           if (action.shouldAddComponentToData) {
             return addComponentsToState(state, rest.component, existingCompos);
           }
@@ -124,32 +125,32 @@ const reducer = (state, action) => {
           return existingCompos;
         });
     }
-    case 'ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE': {
+    case actions.ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE: {
       const { dynamicZoneTarget, componentsToAdd } = action;
 
       return state.updateIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', dynamicZoneTarget, 'components'],
-        list => {
+        (list) => {
           return list.concat(componentsToAdd);
         }
       );
     }
-    case 'CANCEL_CHANGES': {
+    case actions.CANCEL_CHANGES: {
       return state
         .update('modifiedData', () => state.get('initialData'))
         .update('components', () => state.get('initialComponents'));
     }
-    case 'CHANGE_DYNAMIC_ZONE_COMPONENTS': {
+    case actions.CHANGE_DYNAMIC_ZONE_COMPONENTS: {
       const { dynamicZoneTarget, newComponents } = action;
 
       return state
         .updateIn(
           ['modifiedData', 'contentType', 'schema', 'attributes', dynamicZoneTarget, 'components'],
-          list => {
+          (list) => {
             return fromJS(makeUnique([...list.toJS(), ...newComponents]));
           }
         )
-        .updateIn(['modifiedData', 'components'], old => {
+        .updateIn(['modifiedData', 'components'], (old) => {
           const componentsSchema = newComponents.reduce((acc, current) => {
             return addComponentsToState(state, current, acc);
           }, old);
@@ -158,7 +159,7 @@ const reducer = (state, action) => {
         });
     }
 
-    case 'CREATE_SCHEMA': {
+    case actions.CREATE_SCHEMA: {
       const newSchema = {
         uid: action.uid,
         isTemporary: true,
@@ -170,7 +171,7 @@ const reducer = (state, action) => {
 
       return state.updateIn(['contentTypes', action.uid], () => fromJS(newSchema));
     }
-    case 'CREATE_COMPONENT_SCHEMA': {
+    case actions.CREATE_COMPONENT_SCHEMA: {
       const newSchema = {
         uid: action.uid,
         isTemporary: true,
@@ -189,13 +190,13 @@ const reducer = (state, action) => {
 
       return state.updateIn(['components', action.uid], () => fromJS(newSchema));
     }
-    case 'DELETE_NOT_SAVED_TYPE': {
+    case actions.DELETE_NOT_SAVED_TYPE: {
       // Doing so will also reset the modified and the initial data
       return state
         .update('contentTypes', () => state.get('initialContentTypes'))
         .update('components', () => state.get('initialComponents'));
     }
-    case 'EDIT_ATTRIBUTE': {
+    case actions.EDIT_ATTRIBUTE: {
       const {
         attributeToSet: { name, ...rest },
         forTarget,
@@ -209,7 +210,7 @@ const reducer = (state, action) => {
         ? [forTarget]
         : [forTarget, targetUid];
 
-      return newState.updateIn(['modifiedData', ...pathToDataToEdit, 'schema'], obj => {
+      return newState.updateIn(['modifiedData', ...pathToDataToEdit, 'schema'], (obj) => {
         let oppositeAttributeNameToRemove = null;
         let oppositeAttributeNameToUpdate = null;
         let oppositeAttributeNameToCreateBecauseOfNatureChange = null;
@@ -297,9 +298,8 @@ const reducer = (state, action) => {
                     shouldCreateOppositeAttributeBecauseOfNatureChange ||
                     shouldCreateOppositeAttributeBecauseOfTargetChange
                   ) {
-                    acc[oppositeAttributeNameToCreateBecauseOfNatureChange] = fromJS(
-                      oppositeAttributeToCreate
-                    );
+                    acc[oppositeAttributeNameToCreateBecauseOfNatureChange] =
+                      fromJS(oppositeAttributeToCreate);
 
                     oppositeAttributeToCreate = null;
                     oppositeAttributeNameToCreateBecauseOfNatureChange = null;
@@ -310,9 +310,8 @@ const reducer = (state, action) => {
 
                 acc[name] = fromJS(rest);
               } else if (current === oppositeAttributeNameToUpdate) {
-                acc[oppositeAttributeNameToCreateBecauseOfNatureChange] = fromJS(
-                  oppositeAttributeToCreate
-                );
+                acc[oppositeAttributeNameToCreateBecauseOfNatureChange] =
+                  fromJS(oppositeAttributeToCreate);
               } else {
                 acc[current] = obj.getIn(['attributes', current]);
               }
@@ -334,7 +333,7 @@ const reducer = (state, action) => {
       });
     }
 
-    case 'GET_DATA_SUCCEEDED': {
+    case actions.GET_DATA_SUCCEEDED: {
       return state
         .update('components', () => fromJS(action.components))
         .update('initialComponents', () => fromJS(action.components))
@@ -344,9 +343,9 @@ const reducer = (state, action) => {
 
         .update('isLoading', () => false);
     }
-    case 'RELOAD_PLUGIN':
+    case actions.RELOAD_PLUGIN:
       return initialState;
-    case 'REMOVE_FIELD_FROM_DISPLAYED_COMPONENT': {
+    case actions.REMOVE_FIELD_FROM_DISPLAYED_COMPONENT: {
       const { attributeToRemoveName, componentUid } = action;
 
       return state.removeIn([
@@ -358,7 +357,7 @@ const reducer = (state, action) => {
         attributeToRemoveName,
       ]);
     }
-    case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
+    case actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE:
       return state.removeIn([
         'modifiedData',
         'contentType',
@@ -368,7 +367,7 @@ const reducer = (state, action) => {
         'components',
         action.componentToRemoveIndex,
       ]);
-    case 'REMOVE_FIELD': {
+    case actions.REMOVE_FIELD: {
       const { mainDataKey, attributeToRemoveName } = action;
       const pathToAttributes = ['modifiedData', mainDataKey, 'schema', 'attributes'];
       const pathToAttributeToRemove = [...pathToAttributes, attributeToRemoveName];
@@ -393,17 +392,19 @@ const reducer = (state, action) => {
         }
       }
 
-      return state.removeIn(pathToAttributeToRemove).updateIn([...pathToAttributes], attributes => {
-        return attributes.keySeq().reduce((acc, current) => {
-          if (acc.getIn([current, 'targetField']) === attributeToRemoveName) {
-            return acc.removeIn([current, 'targetField']);
-          }
+      return state
+        .removeIn(pathToAttributeToRemove)
+        .updateIn([...pathToAttributes], (attributes) => {
+          return attributes.keySeq().reduce((acc, current) => {
+            if (acc.getIn([current, 'targetField']) === attributeToRemoveName) {
+              return acc.removeIn([current, 'targetField']);
+            }
 
-          return acc;
-        }, attributes);
-      });
+            return acc;
+          }, attributes);
+        });
     }
-    case 'SET_MODIFIED_DATA': {
+    case actions.SET_MODIFIED_DATA: {
       let newState = state
         .update('isLoadingForDataToBeSet', () => false)
         .update('initialData', () => fromJS(action.schemaToSet))
@@ -419,14 +420,14 @@ const reducer = (state, action) => {
 
       return newState;
     }
-    case 'UPDATE_SCHEMA': {
+    case actions.UPDATE_SCHEMA: {
       const {
         data: { name, collectionName, category, icon, kind },
         schemaType,
         uid,
       } = action;
 
-      let newState = state.updateIn(['modifiedData', schemaType], obj => {
+      let newState = state.updateIn(['modifiedData', schemaType], (obj) => {
         let updatedObj = obj
           .updateIn(['schema', 'name'], () => name)
           .updateIn(['schema', 'collectionName'], () => collectionName);
@@ -444,7 +445,7 @@ const reducer = (state, action) => {
       });
 
       if (schemaType === 'component') {
-        newState = newState.updateIn(['components'], obj => {
+        newState = newState.updateIn(['components'], (obj) => {
           return obj.update(uid, () => newState.getIn(['modifiedData', 'component']));
         });
       }

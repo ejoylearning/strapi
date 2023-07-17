@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { hasPermissions, useUser } from 'strapi-helper-plugin';
+import { hasPermissions, useUser } from '@akemona-org/strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import DynamicComponentCard from '../DynamicComponentCard';
@@ -11,7 +11,7 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
   const [isOver, setIsOver] = useState(false);
   const [{ isLoading, canAccess }, setState] = useState({ isLoading: true, canAccess: false });
   const { push } = useHistory();
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -32,8 +32,8 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
   }, []);
 
   const handleMouseEvent = () => {
-    setIsOverDynamicZone(v => !v);
-    setIsOver(v => !v);
+    setIsOverDynamicZone((v) => !v);
+    setIsOver((v) => !v);
   };
 
   return (
@@ -44,7 +44,7 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
       isOver={isOver}
       onClick={() => {
         if (!isLoading && canAccess) {
-          push(`/plugins/${pluginId}/ctm-configurations/edit-settings/components/${componentUid}/`);
+          push(`/plugins/${pluginId}/components/${componentUid}/configurations/edit`);
         }
       }}
       onMouseEvent={handleMouseEvent}

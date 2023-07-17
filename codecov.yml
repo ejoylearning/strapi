@@ -1,6 +1,6 @@
 comment:
   branches:
-    - master
+    - main
     - develop
 
 github_checks:

@@ -1,81 +1,57 @@
 'use strict';
 
+const { getService } = require('../utils');
 const { createModelConfigurationSchema } = require('./validation');
 
 module.exports = {
-  /**
-   * Returns the list of available components
-   */
-  async listComponents(ctx) {
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
+  findComponents(ctx) {
+    const components = getService('components').findAllComponents();
+    const { toDto } = getService('data-mapper');
 
-    const data = Object.keys(strapi.components).map(uid => {
-      return {
-        category: strapi.components[uid].category,
-        ...contentTypeService.formatContentType(strapi.components[uid]),
-      };
-    });
-
-    ctx.body = { data };
+    ctx.body = { data: components.map(toDto) };
   },
-  /**
-   * Returns a component configuration.
-   * It includes
-   *  - schema
-   *  - content-manager layouts (list,edit)
-   *  - content-manager settings
-   *  - content-manager metadata (placeholders, description, label...)
-   */
-  async findComponent(ctx) {
+
+  async findComponentConfiguration(ctx) {
     const { uid } = ctx.params;
 
-    const component = strapi.components[uid];
+    const componentService = getService('components');
+
+    const component = componentService.findComponent(uid);
 
     if (!component) {
       return ctx.notFound('component.notFound');
     }
 
-    const componentService =
-      strapi.plugins['content-manager'].services.components;
+    const configuration = await componentService.findConfiguration(component);
+    const componentsConfigurations = await componentService.findComponentsConfigurations(component);
 
-    const data = await componentService.getComponentInformations(uid);
-
-    ctx.body = { data };
+    ctx.body = {
+      data: {
+        component: configuration,
+        components: componentsConfigurations,
+      },
+    };
   },
-  /**
-   * Updates a component configuration
-   * You can only update the content-manager settings: (use the content-type-builder to update attributes)
-   *  - content-manager layouts (list,edit)
-   *  - content-manager settings
-   *  - content-manager metadata (placeholders, description, label...)
-   */
-  async updateComponent(ctx) {
+
+  async updateComponentConfiguration(ctx) {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
-    const component = strapi.components[uid];
+    const componentService = getService('components');
+
+    const component = componentService.findComponent(uid);
 
     if (!component) {
       return ctx.notFound('component.notFound');
     }
 
-    const componentService =
-      strapi.plugins['content-manager'].services.components;
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
-
-    const schema = contentTypeService.formatContentTypeSchema(component);
     let input;
     try {
-      input = await createModelConfigurationSchema(component, schema).validate(
-        body,
-        {
-          abortEarly: false,
-          stripUnknown: true,
-          strict: true,
-        }
-      );
+      input = await createModelConfigurationSchema(component).validate(body, {
+        abortEarly: false,
+        stripUnknown: true,
+        strict: true,
+      });
     } catch (error) {
       return ctx.badRequest(null, {
         name: 'validationError',
@@ -83,16 +59,8 @@ module.exports = {
       });
     }
 
-    await componentService.setConfiguration(uid, input);
+    const newConfiguration = await componentService.updateConfiguration(component, input);
 
-    const configurations = await componentService.getConfiguration(uid);
-
-    const data = {
-      uid,
-      schema,
-      ...configurations,
-    };
-
-    ctx.body = { data };
+    ctx.body = { data: newConfiguration };
   },
 };

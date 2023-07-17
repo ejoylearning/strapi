@@ -8,12 +8,13 @@
 const path = require('path');
 
 // Master of ceremonies for generators.
-const generate = require('strapi-generate');
+const generate = require('@akemona-org/strapi-generate');
 
 // Logger.
-const { logger } = require('strapi-utils');
+const { logger } = require('@akemona-org/strapi-utils');
 
 // Local Strapi dependencies.
+// eslint-disable-next-line import/extensions
 const packageJSON = require('../../package.json');
 
 /**
@@ -22,7 +23,7 @@ const packageJSON = require('../../package.json');
  * Scaffolding for the application in our working directory.
  */
 
-module.exports = function(id, cliArguments) {
+module.exports = function (id, cliArguments) {
   // Build initial scope.
   const scope = {
     rootPath: process.cwd(),

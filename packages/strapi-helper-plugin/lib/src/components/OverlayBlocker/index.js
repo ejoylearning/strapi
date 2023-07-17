@@ -50,7 +50,7 @@ class OverlayBlocker extends React.Component {
       return;
     }
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       elapsed: Math.round(Date.now() - prevState.start) / 1000,
     }));
   };
@@ -73,7 +73,7 @@ class OverlayBlocker extends React.Component {
       <div className="buttonContainer">
         <a
           className={cn('primary', 'btn')}
-          href="https://strapi.io/documentation"
+          href="https://strapi.akemona.com/documentation"
           target="_blank"
           rel="noopener noreferrer"
         >

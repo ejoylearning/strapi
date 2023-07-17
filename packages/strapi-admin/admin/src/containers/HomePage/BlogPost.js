@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { LoadingBar } from 'strapi-helper-plugin';
+import { LoadingBar } from '@akemona-org/strapi-helper-plugin';
 
 const BlogPost = ({ error, isFirst, isLoading, title, content, link }) => {
   if (isLoading) {
@@ -20,7 +20,7 @@ const BlogPost = ({ error, isFirst, isLoading, title, content, link }) => {
     <a
       rel="noopener noreferrer"
       target="_blank"
-      href={`https://strapi.io/blog/${link}`}
+      href={`https://strapi.akemona.com/blog/${link}`}
       style={{ color: '#333740' }}
     >
       <h2>{title}</h2>

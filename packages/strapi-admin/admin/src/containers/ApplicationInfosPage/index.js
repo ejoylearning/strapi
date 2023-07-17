@@ -4,23 +4,28 @@ import { Flex, Padded, Text } from '@buffetjs/core';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { useIntl } from 'react-intl';
-import BaselineAlignement from '../../components/BaselineAlignement';
+import { BaselineAlignment } from '@akemona-org/strapi-helper-plugin';
 import Bloc from '../../components/Bloc';
 import PageTitle from '../../components/SettingsPageTitle';
 import makeSelectApp from '../App/selectors';
 import makeSelectAdmin from '../Admin/selectors';
 import { Detail, InfoText } from './components';
 
-const makeSelectAppInfos = () => createSelector(makeSelectApp(), appState => appState.appInfos);
+const makeSelectAppInfos = () => createSelector(makeSelectApp(), (appState) => appState.appInfos);
 const makeSelectLatestRelease = () =>
-  createSelector(makeSelectAdmin(), adminState => adminState.latestStrapiReleaseTag);
+  createSelector(makeSelectAdmin(), (adminState) => ({
+    latestStrapiReleaseTag: adminState.latestStrapiReleaseTag,
+    shouldUpdateStrapi: adminState.shouldUpdateStrapi,
+  }));
 
 const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   const selectAppInfos = useMemo(makeSelectAppInfos, []);
   const selectLatestRealase = useMemo(makeSelectLatestRelease, []);
-  const appInfos = useSelector(state => selectAppInfos(state));
-  const latestStrapiReleaseTag = useSelector(state => selectLatestRealase(state));
+  const appInfos = useSelector((state) => selectAppInfos(state));
+  const { shouldUpdateStrapi, latestStrapiReleaseTag } = useSelector((state) =>
+    selectLatestRealase(state)
+  );
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
@@ -38,22 +43,20 @@ const ApplicationInfosPage = () => {
   const nodeVersion = formatMessage({ id: 'Settings.application.node-version' });
   const editionTitle = formatMessage({ id: 'Settings.application.edition-title' });
 
-  const shouldShowUpgradeLink = `v${appInfos.strapiVersion}` !== latestStrapiReleaseTag;
-
   /* eslint-disable indent */
-  const upgradeLink = shouldShowUpgradeLink
+  const upgradeLink = shouldUpdateStrapi
     ? {
         label: upgradeLabel,
-        href: `https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`,
+        href: `https://github.com/akemona/strapi/releases/tag/${latestStrapiReleaseTag}`,
       }
     : null;
   /* eslint-enable indent */
 
   return (
     <div>
-      <PageTitle name="Infos" />
+      <PageTitle name="Application" />
       <Header {...headerProps} />
-      <BaselineAlignement top size="3px" />
+      <BaselineAlignment top size="3px" />
       <Bloc>
         <Padded left right top size="smd">
           <Padded left right top size="xs">
@@ -64,7 +67,7 @@ const ApplicationInfosPage = () => {
                 content={`v${appInfos.strapiVersion}`}
               />
               <Detail
-                link={{ label: pricingLabel, href: 'https://strapi.io/pricing' }}
+                link={{ label: pricingLabel, href: 'https://strapi.akemona.com/pricing' }}
                 title={editionTitle}
                 content={formatMessage({ id: currentPlan })}
               />
@@ -77,7 +80,7 @@ const ApplicationInfosPage = () => {
             </Padded>
           </Padded>
         </Padded>
-        <BaselineAlignement top size="60px" />
+        <BaselineAlignment top size="60px" />
       </Bloc>
     </div>
   );

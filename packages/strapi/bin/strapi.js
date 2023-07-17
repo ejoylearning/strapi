@@ -5,11 +5,15 @@ const _ = require('lodash');
 const resolveCwd = require('resolve-cwd');
 const { yellow } = require('chalk');
 const { Command } = require('commander');
+
 const program = new Command();
 
+// eslint-disable-next-line import/extensions
 const packageJSON = require('../package.json');
 
-const checkCwdIsStrapiApp = name => {
+const strapiPackageName = '@akemona-org/strapi';
+
+const checkCwdIsStrapiApp = (name) => {
   let logErrorAndExit = () => {
     console.log(
       `You need to run ${yellow(
@@ -21,7 +25,7 @@ const checkCwdIsStrapiApp = name => {
 
   try {
     const pkgJSON = require(process.cwd() + '/package.json');
-    if (!_.has(pkgJSON, 'dependencies.strapi')) {
+    if (!_.has(pkgJSON, `dependencies.${strapiPackageName}`)) {
       logErrorAndExit(name);
     }
   } catch (err) {
@@ -29,42 +33,41 @@ const checkCwdIsStrapiApp = name => {
   }
 };
 
-const getLocalScript = name => (...args) => {
-  checkCwdIsStrapiApp(name);
+const getLocalScript =
+  (name) =>
+  (...args) => {
+    checkCwdIsStrapiApp(name);
 
-  const cmdPath = resolveCwd.silent(`strapi/lib/commands/${name}`);
-  if (!cmdPath) {
-    console.log(
-      `Error loading the local ${yellow(
-        name
-      )} command. Strapi might not be installed in your "node_modules". You may need to run "npm install"`
-    );
-    process.exit(1);
-  }
-
-  const script = require(cmdPath);
-
-  Promise.resolve()
-    .then(() => {
-      return script(...args);
-    })
-    .catch(error => {
-      console.error(`Error while running command ${name}: ${error.message || error}`);
+    const cmdPath = resolveCwd.silent(`${strapiPackageName}/lib/commands/${name}`);
+    if (!cmdPath) {
+      console.log(
+        `Error loading the local ${yellow(
+          name
+        )} command. Strapi might not be installed in your "node_modules". You may need to run "npm install"`
+      );
       process.exit(1);
-    });
-};
+    }
+
+    const script = require(cmdPath);
+
+    Promise.resolve()
+      .then(() => {
+        return script(...args);
+      })
+      .catch((error) => {
+        console.error(`Error while running command ${name}: ${error.message || error}`);
+        process.exit(1);
+      });
+  };
 
 // Initial program setup
-program
-  .storeOptionsAsProperties(false)
-  .passCommandToAction(false)
-  .allowUnknownOption(true);
+program.storeOptionsAsProperties(false).passCommandToAction(false).allowUnknownOption(true);
 
 program.helpOption('-h, --help', 'Display help for command');
 program.addHelpCommand('help [command]', 'Display help for command');
 
 // `$ strapi version` (--version synonym)
-program.option('-v, --version', 'Output the version number');
+program.version(packageJSON.version, '-v, --version', 'Output the version number');
 program
   .command('version')
   .description('Output your version of Strapi')
@@ -112,6 +115,7 @@ program
   .alias('dev')
   .option('--no-build', 'Disable build')
   .option('--watch-admin', 'Enable watch', false)
+  .option('--polling', 'Watching file changes in network directories', false)
   .option('--browser <name>', 'Open the browser', true)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
@@ -176,6 +180,12 @@ program
   .description('Generate a basic plugin')
   .action(getLocalScript('generate'));
 
+// `$ strapi generate:template <directory>`
+program
+  .command('generate:template <directory>')
+  .description('Generate template from Strapi project')
+  .action(getLocalScript('generate-template'));
+
 program
   .command('build')
   .option('--clean', 'Remove the build and .cache folders', false)
@@ -208,6 +218,7 @@ program
   .alias('config:dump')
   .description('Dump configurations of your application')
   .option('-f, --file <file>', 'Output file, default output is stdout')
+  .option('-p, --pretty', 'Format the output JSON with indentation and line breaks', false)
   .action(getLocalScript('configurationDump'));
 
 program

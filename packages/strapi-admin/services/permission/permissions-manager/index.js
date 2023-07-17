@@ -1,22 +1,19 @@
 'use strict';
 
 const _ = require('lodash');
+const { cloneDeep, isObject, set, isArray } = require('lodash/fp');
 const { subject: asSubject } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');
 const {
   sanitizeEntity,
   contentTypes: { constants },
-} = require('strapi-utils');
+} = require('@akemona-org/strapi-utils');
 const { buildStrapiQuery, buildCaslQuery } = require('./query-builers');
 
-module.exports = (ability, action, model) => ({
+module.exports = ({ ability, action, model }) => ({
   ability,
   action,
   model,
-
-  get query() {
-    return buildStrapiQuery(buildCaslQuery(ability, action, model));
-  },
 
   get isAllowed() {
     return this.ability.can(action, model);
@@ -30,11 +27,29 @@ module.exports = (ability, action, model) => ({
     return this.sanitize(data, { ...options, isOutput: false });
   },
 
-  queryFrom(query) {
-    return {
-      ...query,
-      _where: query._where ? _.concat(this.query, query._where) : [this.query],
-    };
+  getQuery(queryAction = action) {
+    if (_.isUndefined(queryAction)) {
+      throw new Error('Action must be defined to build a permission query');
+    }
+
+    return buildStrapiQuery(buildCaslQuery(ability, queryAction, model));
+  },
+
+  queryFrom(query = {}, action) {
+    const permissionQuery = this.getQuery(action);
+
+    const newQuery = cloneDeep(query);
+    const { _where } = query;
+
+    if (isObject(_where) && !isArray(_where)) {
+      Object.assign(newQuery, { _where: [_where] });
+    }
+
+    if (!_where) {
+      Object.assign(newQuery, { _where: [] });
+    }
+
+    return set('_where', newQuery._where.concat(permissionQuery), newQuery);
   },
 
   sanitize(data, options = {}) {
@@ -42,11 +57,12 @@ module.exports = (ability, action, model) => ({
       subject = this.toSubject(data),
       action: actionOverride = action,
       withPrivate = true,
+      withHidden = false,
       isOutput = true,
     } = options;
 
     if (_.isArray(data)) {
-      return data.map(entity => this.sanitize(entity, { action, withPrivate, isOutput }));
+      return data.map((entity) => this.sanitize(entity, { action, withPrivate, isOutput }));
     }
 
     const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
@@ -59,6 +75,7 @@ module.exports = (ability, action, model) => ({
       model: strapi.getModel(model),
       includeFields: shouldIncludeAllFields ? null : permittedFields,
       withPrivate,
+      withHidden,
       isOutput,
     });
 

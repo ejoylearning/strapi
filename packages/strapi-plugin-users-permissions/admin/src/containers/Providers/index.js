@@ -9,7 +9,7 @@ import {
   useGlobalContext,
   getYupInnerErrors,
   request,
-} from 'strapi-helper-plugin';
+} from '@akemona-org/strapi-helper-plugin';
 import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
@@ -49,7 +49,7 @@ const ProvidersPage = () => {
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const enabledProvidersCount = useMemo(
-    () => providers.filter(provider => provider.enabled).length,
+    () => providers.filter((provider) => provider.enabled).length,
     [providers]
   );
   const isProviderWithSubdomain = useMemo(() => {
@@ -57,7 +57,7 @@ const ProvidersPage = () => {
       return false;
     }
 
-    const providerToEdit = providers.find(obj => obj.name === providerToEditName);
+    const providerToEdit = providers.find((obj) => obj.name === providerToEditName);
 
     return has(providerToEdit, 'subdomain');
   }, [providers, providerToEditName]);
@@ -105,11 +105,11 @@ const ProvidersPage = () => {
   }, []);
 
   const handleToggle = useCallback(() => {
-    setIsOpen(prev => !prev);
+    setIsOpen((prev) => !prev);
   }, []);
 
   const handleClickEdit = useCallback(
-    provider => {
+    (provider) => {
       if (canUpdate) {
         setProviderToEditName(provider.name);
         handleToggle();
@@ -129,7 +129,7 @@ const ProvidersPage = () => {
   }, []);
 
   const handleSubmit = useCallback(
-    async e => {
+    async (e) => {
       e.preventDefault();
       const { schema } = formToRender;
       let errors = {};
@@ -196,14 +196,14 @@ const ProvidersPage = () => {
           title={listTitle}
           items={providers}
           isLoading={isLoadingForPermissions || isLoading}
-          customRowComponent={provider => (
+          customRowComponent={(provider) => (
             <ListRow
               {...provider}
               onClick={() => handleClickEdit(provider)}
               links={[
                 {
                   icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
-                  onClick: e => {
+                  onClick: (e) => {
                     e.stopPropagation();
                     handleClickEdit(provider);
                   },
@@ -216,7 +216,15 @@ const ProvidersPage = () => {
                   lineHeight="18px"
                   color={provider.enabled ? 'green' : 'lightOrange'}
                 >
-                  {provider.enabled ? 'Enabled' : 'Disabled'}
+                  {provider.enabled
+                    ? formatMessage({
+                        id: getTrad('List.row.provider.enabled'),
+                        defaultMessage: 'Enabled',
+                      })
+                    : formatMessage({
+                        id: getTrad('List.row.provider.disabled'),
+                        defaultMessage: 'Disabled',
+                      })}
                 </Text>
               </td>
             </ListRow>
@@ -239,7 +247,7 @@ const ProvidersPage = () => {
         {showForm && (
           <form onSubmit={handleSubmit}>
             <Row>
-              {formToRender.form.map(input => {
+              {formToRender.form.map((input) => {
                 const label = input.label.params
                   ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
                   : input.label;

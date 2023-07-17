@@ -1,25 +1,42 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('strapi-utils');
+const { yup, formatYupErrors } = require('@akemona-org/strapi-utils');
 
 const createModelConfigurationSchema = require('./model-configuration');
 
 const TYPES = ['singleType', 'collectionType'];
 
+const handleError = (error) => {
+  throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
+};
+
 /**
  * Validates type kind
  */
-const validateKind = kind => {
+const validateKind = (kind) => {
   return yup
     .string()
     .oneOf(TYPES)
     .nullable()
     .validate(kind)
-    .catch(error => Promise.reject(formatYupErrors(error)));
+    .catch((error) => Promise.reject(formatYupErrors(error)));
 };
 
-const validateGenerateUIDInput = data => {
+const validateBulkDeleteInput = (data = {}) => {
+  return yup
+    .object({
+      ids: yup.array().of(yup.strapiID()).min(1).required(),
+    })
+    .required()
+    .validate(data, {
+      strict: true,
+      abortEarly: false,
+    })
+    .catch(handleError);
+};
+
+const validateGenerateUIDInput = (data) => {
   return yup
     .object({
       contentTypeUID: yup.string().required(),
@@ -30,28 +47,21 @@ const validateGenerateUIDInput = data => {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => {
-      throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
-    });
+    .catch(handleError);
 };
 
-const validateCheckUIDAvailabilityInput = data => {
+const validateCheckUIDAvailabilityInput = (data) => {
   return yup
     .object({
       contentTypeUID: yup.string().required(),
       field: yup.string().required(),
-      value: yup
-        .string()
-        .matches(new RegExp('^[A-Za-z0-9-_.~]*$'))
-        .required(),
+      value: yup.string().matches(new RegExp('^[A-Za-z0-9-_.~]*$')).required(),
     })
     .validate(data, {
       strict: true,
       abortEarly: false,
     })
-    .catch(error => {
-      throw strapi.errors.badRequest('ValidationError', formatYupErrors(error));
-    });
+    .catch(handleError);
 };
 
 const validateUIDField = (contentTypeUID, field) => {
@@ -71,10 +81,24 @@ const validateUIDField = (contentTypeUID, field) => {
   }
 };
 
+const validatePagination = ({ page, pageSize }) => {
+  const pageNumber = parseInt(page);
+  const pageSizeNumber = parseInt(pageSize);
+
+  if (isNaN(pageNumber) || pageNumber < 1) {
+    throw strapi.errors.badRequest('invalid pageNumber param');
+  }
+  if (isNaN(pageSizeNumber) || pageSizeNumber < 1) {
+    throw strapi.errors.badRequest('invalid pageSize param');
+  }
+};
+
 module.exports = {
   createModelConfigurationSchema,
   validateKind,
+  validateBulkDeleteInput,
   validateGenerateUIDInput,
   validateCheckUIDAvailabilityInput,
   validateUIDField,
+  validatePagination,
 };

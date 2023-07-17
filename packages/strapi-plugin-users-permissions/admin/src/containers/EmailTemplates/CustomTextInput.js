@@ -28,7 +28,7 @@ const CustomTextInput = ({
 
   const link = (
     <a
-      href="https://strapi.io/documentation/v3.x/plugins/users-permissions.html#templating-emails"
+      href="https://strapi.akemona.com/documentation/developer-docs/latest/development/plugins/users-permissions.html#templating-emails"
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -56,7 +56,7 @@ const CustomTextInput = ({
             id={inputId}
             aria-invalid={error ? 'true' : 'false'}
             onBlur={onBlur}
-            onChange={e => {
+            onChange={(e) => {
               if (!canCheck) {
                 dispatch({
                   type: 'SET_CHECK',

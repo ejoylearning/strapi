@@ -2,7 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 // FIXME
-// import { OverlayBlocker } from 'strapi-helper-plugin';
+// import { OverlayBlocker } from '@akemona-org/strapi-helper-plugin';
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
@@ -20,6 +20,7 @@ describe('<Admin />', () => {
       admin: {
         appError: false,
         latestStrapiReleaseTag: '3',
+        shouldUpdateStrapi: false,
       },
       disableGlobalOverlayBlocker: jest.fn(),
       emitEvent: jest.fn(),

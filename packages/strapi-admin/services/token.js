@@ -1,8 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
 const crypto = require('crypto');
+const _ = require('lodash');
 const jwt = require('jsonwebtoken');
+
 const defaultJwtOptions = { expiresIn: '30d' };
 
 const getTokenOptions = () => {
@@ -26,7 +27,7 @@ const createToken = () => {
  * Creates a JWT token for an administration user
  * @param {object} user - admin user
  */
-const createJwtToken = user => {
+const createJwtToken = (user) => {
   const { options, secret } = getTokenOptions();
 
   return jwt.sign({ id: user.id }, secret, options);
@@ -37,7 +38,7 @@ const createJwtToken = user => {
  * @param {string} token - a token to decode
  * @return {Object} decodeInfo - the decoded info
  */
-const decodeJwtToken = token => {
+const decodeJwtToken = (token) => {
   const { secret } = getTokenOptions();
 
   try {

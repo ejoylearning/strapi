@@ -8,7 +8,7 @@ import React, { memo } from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { HeaderSearch, GlobalContext } from 'strapi-helper-plugin';
+import { HeaderSearch, GlobalContext } from '@akemona-org/strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 
 const WAIT = 400;
@@ -45,13 +45,12 @@ class Search extends React.Component {
     this.triggerChange('');
   };
 
-  triggerChange = value =>
-    this.props.changeParams({
-      target: {
-        name: '_q',
-        value,
-      },
-    });
+  triggerChange = (value) => {
+    const method = value ? 'push' : 'remove';
+    const params = method === 'push' ? { _q: value, page: 1 } : { _q: '' };
+
+    this.props.changeParams(params, method);
+  };
 
   render() {
     const { model } = this.props;
@@ -59,7 +58,7 @@ class Search extends React.Component {
 
     return (
       <FormattedMessage id={getTrad('components.Search.placeholder')}>
-        {placeholder => (
+        {(placeholder) => (
           <HeaderSearch
             label={upperFirst(model)}
             onChange={this.handleChange}

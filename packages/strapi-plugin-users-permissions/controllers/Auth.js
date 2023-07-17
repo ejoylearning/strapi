@@ -10,10 +10,11 @@
 const crypto = require('crypto');
 const _ = require('lodash');
 const grant = require('grant-koa');
-const { sanitizeEntity } = require('strapi-utils');
+const { sanitizeEntity } = require('@akemona-org/strapi-utils');
 
-const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const formatError = error => [
+const emailRegExp =
+  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const formatError = (error) => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
@@ -149,7 +150,8 @@ module.exports = {
       }
 
       // Connect the user with the third-party provider.
-      let user, error;
+      let user;
+      let error;
       try {
         [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(
           provider,
@@ -256,15 +258,14 @@ module.exports = {
 
     if (!strapi.config.server.url.startsWith('http')) {
       strapi.log.warn(
-        'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://strapi.io/documentation/v3.x/plugins/users-permissions.html#setting-up-the-server-url'
+        'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://strapi.akemona.com/documentation/developer-docs/latest/development/plugins/users-permissions.html#setting-up-the-server-url'
       );
     }
 
     // Ability to pass OAuth callback dynamically
     grantConfig[provider].callback = _.get(ctx, 'query.callback') || grantConfig[provider].callback;
-    grantConfig[provider].redirect_uri = strapi.plugins[
-      'users-permissions'
-    ].services.providers.buildRedirectUri(provider);
+    grantConfig[provider].redirect_uri =
+      strapi.plugins['users-permissions'].services.providers.buildRedirectUri(provider);
 
     return grant(grantConfig)(ctx, next);
   },
@@ -282,7 +283,7 @@ module.exports = {
         null,
         formatError({
           id: 'Auth.form.error.email.format',
-          message: 'Please provide valid email address.',
+          message: 'Please provide a valid email address.',
         })
       );
     }
@@ -309,10 +310,21 @@ module.exports = {
       );
     }
 
+    // User blocked
+    if (user.blocked) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.user.blocked',
+          message: 'This user is disabled.',
+        })
+      );
+    }
+
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
-    const settings = await pluginStore.get({ key: 'email' }).then(storeEmail => {
+    const settings = await pluginStore.get({ key: 'email' }).then((storeEmail) => {
       try {
         return storeEmail['reset_password'].options;
       } catch (error) {

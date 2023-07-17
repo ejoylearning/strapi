@@ -3,22 +3,24 @@
 const _ = require('lodash');
 const mongoose = require('mongoose');
 
-const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi-utils');
+const {
+  models: utilsModels,
+  contentTypes: contentTypesUtils,
+} = require('@akemona-org/strapi-utils');
 const utils = require('./utils');
 const populateQueries = require('./utils/populate-queries');
 const relations = require('./relations');
 const { findComponentByGlobalId } = require('./utils/helpers');
-const { didDefinitionChange, storeDefinition } = require('./utils/store-definition');
-const { migrateDraftAndPublish } = require('./database-migration');
-
 const {
-  PUBLISHED_AT_ATTRIBUTE,
-  CREATED_BY_ATTRIBUTE,
-  UPDATED_BY_ATTRIBUTE,
-  DP_PUB_STATES,
-} = contentTypesUtils.constants;
+  didDefinitionChange,
+  storeDefinition,
+  getDefinitionFromStore,
+} = require('./utils/store-definition');
 
-const isPolymorphicAssoc = assoc => {
+const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE, DP_PUB_STATES } =
+  contentTypesUtils.constants;
+
+const isPolymorphicAssoc = (assoc) => {
   return assoc.nature.toLowerCase().indexOf('morph') !== -1;
 };
 
@@ -45,6 +47,8 @@ module.exports = async ({ models, target }, ctx) => {
         definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
           type: 'datetime',
           configurable: false,
+          writable: true,
+          visible: false,
         };
       }
 
@@ -55,6 +59,7 @@ module.exports = async ({ models, target }, ctx) => {
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
 
@@ -63,20 +68,21 @@ module.exports = async ({ models, target }, ctx) => {
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
     }
 
-    const componentAttributes = Object.keys(definition.attributes).filter(key =>
+    const componentAttributes = Object.keys(definition.attributes).filter((key) =>
       ['component', 'dynamiczone'].includes(definition.attributes[key].type)
     );
 
-    const scalarAttributes = Object.keys(definition.attributes).filter(key => {
+    const scalarAttributes = Object.keys(definition.attributes).filter((key) => {
       const { type } = definition.attributes[key];
       return type !== undefined && type !== null && type !== 'component' && type !== 'dynamiczone';
     });
 
-    const relationalAttributes = Object.keys(definition.attributes).filter(key => {
+    const relationalAttributes = Object.keys(definition.attributes).filter((key) => {
       const { type } = definition.attributes[key];
       return type === undefined;
     });
@@ -84,7 +90,7 @@ module.exports = async ({ models, target }, ctx) => {
     // handle component and dynamic zone attrs
     if (componentAttributes.length > 0) {
       // create join morph collection thingy
-      componentAttributes.forEach(name => {
+      componentAttributes.forEach((name) => {
         definition.loadedModel[name] = [
           {
             kind: String,
@@ -98,7 +104,7 @@ module.exports = async ({ models, target }, ctx) => {
     }
 
     // handle scalar attrs
-    scalarAttributes.forEach(name => {
+    scalarAttributes.forEach((name) => {
       const attr = definition.attributes[name];
       definition.loadedModel[name] = {
         ...attr,
@@ -110,7 +116,7 @@ module.exports = async ({ models, target }, ctx) => {
     });
 
     // handle relational attrs
-    relationalAttributes.forEach(name => {
+    relationalAttributes.forEach((name) => {
       buildRelation({
         definition,
         model,
@@ -139,7 +145,7 @@ module.exports = async ({ models, target }, ctx) => {
       definition,
     });
 
-    findLifecycles.forEach(key => {
+    findLifecycles.forEach((key) => {
       schema.pre(key, populateFn);
     });
 
@@ -176,7 +182,7 @@ module.exports = async ({ models, target }, ctx) => {
 
     schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
-    const refToStrapiRef = obj => {
+    const refToStrapiRef = (obj) => {
       const ref = obj.ref;
 
       let plainData = ref && typeof ref.toJSON === 'function' ? ref.toJSON() : ref;
@@ -189,19 +195,39 @@ module.exports = async ({ models, target }, ctx) => {
       };
     };
 
+    const parseComponentRef = (el) => {
+      if (el.ref instanceof mongoose.Types.ObjectId) {
+        return el.ref.toString();
+      } else {
+        return el.ref;
+      }
+    };
+
+    const parseDynamicZoneRef = (el) => {
+      if (el.ref instanceof mongoose.Types.ObjectId) {
+        return { id: el.ref.toString() };
+      } else {
+        return el.ref;
+      }
+    };
+
+    const associations = definition.associations.filter(
+      (association) => !isPolymorphicAssoc(association)
+    );
+
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
-      transform: function(doc, returned) {
+      transform: function (doc, returned) {
         // Remover $numberDecimal nested property.
 
         Object.keys(returned)
-          .filter(key => returned[key] instanceof mongoose.Types.Decimal128)
-          .forEach(key => {
+          .filter((key) => returned[key] instanceof mongoose.Types.Decimal128)
+          .forEach((key) => {
             // Parse to float number.
             returned[key] = parseFloat(returned[key].toString());
           });
 
-        morphAssociations.forEach(association => {
+        morphAssociations.forEach((association) => {
           if (
             Array.isArray(returned[association.alias]) &&
             returned[association.alias].length > 0
@@ -215,7 +241,7 @@ module.exports = async ({ models, target }, ctx) => {
 
               case 'manyMorphToMany':
               case 'manyMorphToOne': {
-                returned[association.alias] = returned[association.alias].map(obj =>
+                returned[association.alias] = returned[association.alias].map((obj) =>
                   refToStrapiRef(obj)
                 );
 
@@ -226,13 +252,13 @@ module.exports = async ({ models, target }, ctx) => {
           }
         });
 
-        componentAttributes.forEach(name => {
+        componentAttributes.forEach((name) => {
           const attribute = definition.attributes[name];
           const { type } = attribute;
 
           if (type === 'component') {
             if (Array.isArray(returned[name])) {
-              const components = returned[name].map(el => el.ref);
+              const components = returned[name].map(parseComponentRef);
               // Reformat data by bypassing the many-to-many relationship.
               returned[name] =
                 attribute.repeatable === true ? components : _.first(components) || null;
@@ -241,12 +267,32 @@ module.exports = async ({ models, target }, ctx) => {
 
           if (type === 'dynamiczone') {
             if (returned[name]) {
-              returned[name] = returned[name].filter(el => el && el.kind).map(el => {
-                return {
-                  __component: findComponentByGlobalId(el.kind).uid,
-                  ...el.ref,
-                };
-              });
+              returned[name] = returned[name]
+                .filter((el) => el && el.kind)
+                .map((el) => {
+                  return {
+                    __component: findComponentByGlobalId(el.kind).uid,
+                    ...parseDynamicZoneRef(el),
+                  };
+                });
+            }
+          }
+        });
+
+        associations.forEach((association) => {
+          const relation = returned[association.alias];
+
+          if (relation) {
+            // Extract raw JSON data.
+            returned[association.alias] = relation.toJSON ? relation.toJSON() : relation;
+
+            if (_.isArray(association.populate)) {
+              const { alias, populate } = association;
+              const pickPopulate = (entry) => _.pick(entry, populate);
+
+              returned[alias] = _.isArray(returned[alias])
+                ? _.map(returned[alias], pickPopulate)
+                : pickPopulate(returned[alias]);
             }
           }
         });
@@ -257,7 +303,7 @@ module.exports = async ({ models, target }, ctx) => {
     const Model = instance.model(definition.globalId, schema, definition.collectionName);
 
     const handleIndexesErrors = () => {
-      Model.on('index', error => {
+      Model.on('index', (error) => {
         if (error) {
           if (error.code === 11000) {
             strapi.log.error(
@@ -270,15 +316,24 @@ module.exports = async ({ models, target }, ctx) => {
       });
     };
 
-    // Only sync indexes in development env while it's not possible to create complex indexes directly from models
-    // In other environments it will simply create missing indexes (those defined in the models but not present in db)
-    if (strapi.app.env === 'development') {
+    // Only sync indexes when not in production env while it's not possible to create complex indexes directly from models
+    // In production it will simply create missing indexes (those defined in the models but not present in db)
+    // * NOTE removed as compound indexes are not supported & this would remove such index if added directly on dev env
+    // * TODO can be enabled later if compound index support is added in models by chaging mount models
+    /*  if (strapi.app.env !== 'production') {
       // Ensure indexes are synced with the model, prevent duplicate index errors
       // Side-effect: Delete all the indexes not present in the model.json
-      Model.syncIndexes(null, handleIndexesErrors);
-    } else {
-      handleIndexesErrors();
-    }
+      Model.syncIndexes().then(
+        () => {
+          strapi.log.debug('Mongo sync index call successful.');
+        },
+        (error) => {
+          strapi.log.error('Mongo index sync failed: %o', error);
+        }
+      );
+    } else { */
+    handleIndexesErrors();
+    // }
 
     // Expose ORM functions through the `target` object.
     target[model] = _.assign(Model, target[model]);
@@ -287,11 +342,10 @@ module.exports = async ({ models, target }, ctx) => {
     target[model]._attributes = definition.attributes;
     target[model].updateRelations = relations.update;
     target[model].deleteRelations = relations.deleteRelations;
-
     target[model].privateAttributes = contentTypesUtils.getPrivateAttributes(target[model]);
   }
 
-  // Instanciate every models
+  // Instantiate every models
   Object.keys(models).forEach(mountModel);
 
   // Migrations + storing schema
@@ -299,63 +353,84 @@ module.exports = async ({ models, target }, ctx) => {
     const definition = models[model];
     const modelInstance = target[model];
     const definitionDidChange = await didDefinitionChange(definition, instance);
+
+    const previousDefinition = await getDefinitionFromStore(definition, instance);
+
+    // run migrations
+    await strapi.db.migrations.run(migrateSchema, {
+      definition,
+      previousDefinition,
+      model: modelInstance,
+      ORM: instance,
+    });
+
     if (definitionDidChange) {
-      await migrateDraftAndPublish({ definition, model: modelInstance, ORM: instance });
       await storeDefinition(definition, instance);
     }
   }
 };
 
-const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
-  return function() {
-    const populatedPaths = this.getPopulatedPaths();
-    const { publicationState } = this.getOptions();
+// noop migration to match migration API
+const migrateSchema = () => {};
 
-    const getMatchQuery = assoc => {
+const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
+  return function () {
+    const populatedPaths = this.getPopulatedPaths();
+    const {
+      publicationState,
+      _populateComponents = true,
+      _populateMorphRelations = true,
+    } = this.getOptions();
+
+    const getMatchQuery = (assoc) => {
       const assocModel = strapi.db.getModelByAssoc(assoc);
 
-      if (
-        contentTypesUtils.hasDraftAndPublish(assocModel) &&
-        DP_PUB_STATES.includes(publicationState)
-      ) {
+      const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(assocModel);
+      if (hasDraftAndPublish && DP_PUB_STATES.includes(publicationState)) {
         return populateQueries.publicationState[publicationState];
       }
 
       return undefined;
     };
 
-    morphAssociations.forEach(association => {
-      const matchQuery = getMatchQuery(association);
-      const { alias, nature } = association;
+    if (_populateMorphRelations) {
+      morphAssociations.forEach((association) => {
+        const matchQuery = getMatchQuery(association);
+        const { alias, nature } = association;
 
-      if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
-        this.populate({ path: alias, match: matchQuery, options: { publicationState } });
-      } else if (populatedPaths.includes(alias)) {
-        _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
-        _.set(this._mongooseOptions.populate, [alias, 'options'], { publicationState });
+        if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
+          this.populate({ path: alias, match: matchQuery, options: { publicationState } });
+        } else if (populatedPaths.includes(alias)) {
+          _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
+          _.set(this._mongooseOptions.populate, [alias, 'options'], {
+            publicationState,
+          });
 
-        if (matchQuery !== undefined) {
-          _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+          if (matchQuery !== undefined) {
+            _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+          }
         }
-      }
-    });
+      });
+    }
+
+    if (_populateComponents) {
+      componentAttributes.forEach((key) => {
+        this.populate({ path: `${key}.ref`, options: { publicationState } });
+      });
+    }
 
     if (definition.modelType === 'component') {
       definition.associations
-        .filter(assoc => !isPolymorphicAssoc(assoc))
-        .filter(ast => ast.autoPopulate !== false)
-        .forEach(ast => {
+        .filter((assoc) => !isPolymorphicAssoc(assoc))
+        .filter((ast) => ast.autoPopulate !== false)
+        .forEach((ast) => {
           this.populate({
             path: ast.alias,
             match: getMatchQuery(ast),
-            options: { publicationState },
+            options: { publicationState, _populateComponents: false },
           });
         });
     }
-
-    componentAttributes.forEach(key => {
-      this.populate({ path: `${key}.ref`, options: { publicationState } });
-    });
   };
 };
 

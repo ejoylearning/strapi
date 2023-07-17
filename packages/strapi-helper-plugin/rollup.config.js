@@ -16,7 +16,7 @@ export default {
       file: pkg.main,
       format: 'cjs',
       sourceMap: false,
-      name: 'strapi-helper-plugin',
+      name: '@akemona-org/strapi-helper-plugin',
       compact: true,
       globals: {
         react: 'React',
@@ -28,7 +28,7 @@ export default {
       sourceMap: false,
       file: pkg.module,
       format: 'es',
-      name: 'strapi-helper-plugin',
+      name: '@akemona-org/strapi-helper-plugin',
       compact: true,
       globals: {
         react: 'React',
@@ -54,8 +54,5 @@ export default {
     }),
   ],
 
-  external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-  ],
+  external: [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})],
 };

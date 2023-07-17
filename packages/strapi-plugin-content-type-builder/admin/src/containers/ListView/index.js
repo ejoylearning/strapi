@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import { BackHeader, ListWrapper, useGlobalContext } from 'strapi-helper-plugin';
+import { BackHeader, ListWrapper, useGlobalContext } from '@akemona-org/strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
@@ -87,7 +87,7 @@ const ListView = () => {
     push({ search: makeSearch(searchObj) });
   };
 
-  const handleClickAddComponentToDZ = async dzName => {
+  const handleClickAddComponentToDZ = async (dzName) => {
     const firstHeaderObject = {
       header_label_1: currentDataName,
       header_icon_name_1: 'dynamiczone',
@@ -163,7 +163,7 @@ const ListView = () => {
   const wait = async () => {
     togglePrompt(false);
 
-    return new Promise(resolve => setTimeout(resolve, 100));
+    return new Promise((resolve) => setTimeout(resolve, 100));
   };
   const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
@@ -255,30 +255,21 @@ const ListView = () => {
       handleClickAddField(forTarget, targetUid, headerDisplayObject);
     },
   };
-  const goToCMSettingsPage = useCallback(() => {
-    const endPoint = isInContentTypeView
-      ? `/plugins/content-manager/${contentTypeKind}/${targetUid}/ctm-configurations/edit-settings/content-types`
-      : `/plugins/content-manager/ctm-configurations/edit-settings/components/${targetUid}/`;
-
-    if (!isTemporary) {
-      push(endPoint);
-    }
-  }, [contentTypeKind, isInContentTypeView, isTemporary, push, targetUid]);
 
   const listInjectedComponents = useMemo(() => {
     return getComponents('listView', 'list.link', plugins, {
-      onClick: goToCMSettingsPage,
+      targetUid,
       isTemporary,
       isInContentTypeView,
       contentTypeKind,
     });
-  }, [plugins, goToCMSettingsPage, isTemporary, isInContentTypeView, contentTypeKind]);
+  }, [plugins, isTemporary, targetUid, isInContentTypeView, contentTypeKind]);
 
   const listActions = isInDevelopmentMode
     ? [...listInjectedComponents, <ListButton {...addButtonProps} key="add-button" />]
     : listInjectedComponents;
 
-  const CustomRow = props => {
+  const CustomRow = (props) => {
     const { name } = props;
 
     return <ListRow {...props} attributeName={name} name={name} onClick={handleClickEditField} />;
@@ -310,7 +301,7 @@ const ListView = () => {
                 <ListHeader actions={listActions} title={listTitle} />
                 <List
                   items={convertAttrObjToArray(attributes)}
-                  customRowComponent={props => <CustomRow {...props} />}
+                  customRowComponent={(props) => <CustomRow {...props} />}
                   addComponentToDZ={handleClickAddComponentToDZ}
                   targetUid={targetUid}
                   dataType={forTarget}

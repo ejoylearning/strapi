@@ -2,7 +2,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import BaselineAlignment from '../../../../components/BaselineAlignement';
+import { BaselineAlignment } from '@akemona-org/strapi-helper-plugin';
 import Button from '../../../../components/FullWidthButton';
 import AuthLink from '../AuthLink';
 import Input from '../Input';
@@ -52,7 +52,7 @@ const ForgotPassword = ({ formErrors, modifiedData, onChange, onSubmit }) => {
 };
 
 ForgotPassword.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
 };
 
 ForgotPassword.propTypes = {

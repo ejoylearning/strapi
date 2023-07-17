@@ -7,18 +7,17 @@
 // Node.js core.
 const fs = require('fs');
 const path = require('path');
+const stream = require('stream');
 const _ = require('lodash');
 const koaStatic = require('koa-static');
-const stream = require('stream');
-const serveStatic = require('./serve-static');
-
 const utils = require('../../utils');
+const serveStatic = require('./serve-static');
 
 /**
  * Public assets hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook
@@ -82,16 +81,18 @@ module.exports = strapi => {
       if (!strapi.config.serveAdminPanel) return;
 
       const buildDir = path.resolve(strapi.dir, 'build');
+      const serveAdmin = (ctx) => {
+        ctx.type = 'html';
+        ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
+      };
 
       strapi.router.get(
-        `${strapi.config.admin.path}/*`,
+        `${strapi.config.admin.path}/(.*)`,
         serveStatic(buildDir, { maxage: maxAge, defer: false, index: 'index.html' })
       );
 
-      strapi.router.get(`${strapi.config.admin.path}*`, ctx => {
-        ctx.type = 'html';
-        ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
-      });
+      strapi.router.get(`${strapi.config.admin.path}`, serveAdmin);
+      strapi.router.get(`${strapi.config.admin.path}/(.*)`, serveAdmin);
     },
   };
 };

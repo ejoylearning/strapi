@@ -1,8 +1,11 @@
 {
-  "name": "strapi-provider-email-nodemailer",
-  "version": "3.3.3",
+  "name": "@akemona-org/strapi-provider-email-nodemailer",
+  "version": "3.12.4",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Nodemailer provider for Strapi 3",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.akemona.com",
   "keywords": [
     "strapi",
     "email",
@@ -14,12 +17,12 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "lodash": "4.17.19",
-    "nodemailer": "6.3.0"
+    "lodash": "4.17.21",
+    "nodemailer": "6.6.1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/strapi/strapi.git"
+    "url": "https://github.com/akemona/strapi.git"
   },
   "author": {
     "name": "Yurii Tykhomyrov"
@@ -46,17 +49,18 @@
   ],
   "maintainers": [
     {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "name": "Akemona team",
+      "email": "strapi@akemona.com",
+      "url": "https://strapi.akemona.com"
     }
   ],
   "license": "SEE LICENSE IN LICENSE",
   "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+    "url": "https://github.com/akemona/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
-  }
+  },
+  "gitHead": "57095241bb8bc011c97ecbc8c7274b674b01cd0f"
 }

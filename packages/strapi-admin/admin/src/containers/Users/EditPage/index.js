@@ -2,17 +2,21 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-import { useGlobalContext, auth } from 'strapi-helper-plugin';
+import {
+  BaselineAlignment,
+  useGlobalContext,
+  SizedInput,
+  auth,
+} from '@akemona-org/strapi-helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormBloc from '../../../components/FormBloc';
-import SizedInput from '../../../components/SizedInput';
-import { Header, MagicLink, SelectRoles } from '../../../components/Users';
-import { useUsersForm } from '../../../hooks';
+import { Header } from '../../../components/Settings';
+import { MagicLink, SelectRoles } from '../../../components/Users';
+import { useSettingsForm } from '../../../hooks';
 import { editValidation } from '../../../validations/users';
 import form from './utils/form';
 
@@ -23,7 +27,7 @@ const EditPage = ({ canUpdate }) => {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/users/:id`);
 
-  const cbSuccess = data => {
+  const cbSuccess = (data) => {
     const userInfos = auth.getUserInfo();
 
     // The user is updating themself
@@ -36,7 +40,7 @@ const EditPage = ({ canUpdate }) => {
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
-  ] = useUsersForm(`/admin/users/${id}`, editValidation, cbSuccess, [
+  ] = useSettingsForm(`/admin/users/${id}`, editValidation, cbSuccess, [
     'email',
     'firstname',
     'lastname',
@@ -74,10 +78,10 @@ const EditPage = ({ canUpdate }) => {
               <Padded top bottom size="sm">
                 <MagicLink registrationToken={initialData.registrationToken} />
               </Padded>
-              <BaselineAlignement top size="1px" />
+              <BaselineAlignment top size="1px" />
             </>
           ) : (
-            <BaselineAlignement top size="3px" />
+            <BaselineAlignment top size="3px" />
           )}
 
           <FormBloc
@@ -86,7 +90,7 @@ const EditPage = ({ canUpdate }) => {
               id: 'app.components.Users.ModalCreateBody.block-title.details',
             })}
           >
-            {Object.keys(form).map(key => {
+            {Object.keys(form).map((key) => {
               return (
                 <SizedInput
                   {...form[key]}
@@ -100,7 +104,9 @@ const EditPage = ({ canUpdate }) => {
               );
             })}
           </FormBloc>
-          <BaselineAlignement top size="2px" />
+
+          <BaselineAlignment top size="2px" />
+
           <Padded top size="md">
             {!isLoading && (
               <FormBloc
@@ -115,7 +121,7 @@ const EditPage = ({ canUpdate }) => {
                       error={formErrors.roles}
                       value={get(modifiedData, 'roles', [])}
                     />
-                    <BaselineAlignement top size={hasRolesError ? '0' : '17px'} />
+                    <BaselineAlignment top size={hasRolesError ? '0' : '17px'} />
                   </Padded>
                 </Col>
               </FormBloc>
@@ -124,6 +130,7 @@ const EditPage = ({ canUpdate }) => {
         </ContainerFluid>
         <Padded bottom size="md" />
       </form>
+      <BaselineAlignment bottom size="80px" />
     </>
   );
 };

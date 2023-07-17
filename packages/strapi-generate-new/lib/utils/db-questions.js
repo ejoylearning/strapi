@@ -1,9 +1,11 @@
+'use strict';
+
 const database = ({ scope }) => ({
   type: 'input',
   name: 'database',
   message: 'Database name:',
   default: scope.name,
-  validate: value => {
+  validate: (value) => {
     if (value.includes('.')) {
       return `The database name can't contain a "."`;
     }
@@ -29,9 +31,7 @@ const srv = () => ({
 const port = ({ client }) => ({
   type: 'input',
   name: 'port',
-  message: `Port${
-    client === 'mongo' ? ' (It will be ignored if you enable +srv)' : ''
-  }:`,
+  message: `Port${client === 'mongo' ? ' (It will be ignored if you enable +srv)' : ''}:`,
   default: () => {
     const ports = {
       mongo: 27017,
@@ -80,14 +80,5 @@ module.exports = {
   sqlite: [filename],
   postgres: [database, host, port, username, password, ssl],
   mysql: [database, host, port, username, password, ssl],
-  mongo: [
-    database,
-    host,
-    srv,
-    port,
-    username,
-    password,
-    authenticationDatabase,
-    ssl,
-  ],
+  mongo: [database, host, srv, port, username, password, authenticationDatabase, ssl],
 };

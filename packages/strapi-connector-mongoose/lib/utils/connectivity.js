@@ -21,7 +21,6 @@ module.exports = async ({ connection }) => {
   }
 
   connectOptions.ssl = ssl ? true : false;
-  connectOptions.useNewUrlParser = true;
   connectOptions.dbName = connection.settings.database;
 
   return Mongoose.connect(
@@ -33,7 +32,7 @@ module.exports = async ({ connection }) => {
     () => {
       Mongoose.connection.close();
     },
-    error => {
+    (error) => {
       Mongoose.connection.close();
       throw error;
     }

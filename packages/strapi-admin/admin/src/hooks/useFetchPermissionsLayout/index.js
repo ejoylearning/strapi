@@ -1,9 +1,9 @@
 import { useEffect, useReducer } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@akemona-org/strapi-helper-plugin';
 
 import reducer, { initialState } from './reducer';
 
-const useFetchPermissionsLayout = () => {
+const useFetchPermissionsLayout = (id) => {
   const [{ data, error, isLoading }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -12,7 +12,10 @@ const useFetchPermissionsLayout = () => {
         type: 'GET_DATA',
       });
 
-      const { data } = await request('/admin/permissions', { method: 'GET' });
+      const { data } = await request('/admin/permissions', {
+        method: 'GET',
+        params: { role: id },
+      });
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
@@ -21,7 +24,7 @@ const useFetchPermissionsLayout = () => {
     };
 
     getData();
-  }, []);
+  }, [id]);
 
   return { data, error, isLoading };
 };

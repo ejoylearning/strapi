@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import { Padded } from '@buffetjs/core';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import BaselineAlignment from '../../../../components/BaselineAlignement';
+import { BaselineAlignment } from '@akemona-org/strapi-helper-plugin';
 import Button from '../../../../components/FullWidthButton';
 import AuthLink from '../AuthLink';
 import Input from '../Input';
@@ -58,7 +58,7 @@ const ResetPassword = ({ formErrors, modifiedData, onChange, onSubmit, requestEr
 };
 
 ResetPassword.defaultProps = {
-  onSubmit: e => e.preventDefault(),
+  onSubmit: (e) => e.preventDefault(),
   requestError: null,
 };
 

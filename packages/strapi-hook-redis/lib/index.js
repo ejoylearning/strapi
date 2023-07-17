@@ -16,7 +16,7 @@ const stackTrace = require('stack-trace');
  * Redis hook
  */
 
-module.exports = function(strapi) {
+module.exports = function (strapi) {
   const hook = {
     /**
      * Default options
@@ -75,7 +75,7 @@ module.exports = function(strapi) {
           )
         );
 
-        redis.on('error', err => {
+        redis.on('error', (err) => {
           strapi.log.error(err);
           process.exit(0);
         });
@@ -105,10 +105,7 @@ module.exports = function(strapi) {
           if (!cache) {
             cache = await cb();
 
-            if (
-              cache &&
-              _.get(connection, 'options.disabledCaching') !== true
-            ) {
+            if (cache && _.get(connection, 'options.disabledCaching') !== true) {
               switch (type) {
                 case 'json':
                   redis.set(serial, JSON.stringify(cache), 'ex', expired);
@@ -147,6 +144,9 @@ module.exports = function(strapi) {
 
         if (_.get(connection, 'options.debug') === true) {
           redis.monitor((err, monitor) => {
+            if (err) {
+              console.error(err);
+            }
             // Entering monitoring mode.
             monitor.on('monitor', (time, args) => {
               console.log(time + ': ' + util.inspect(args));

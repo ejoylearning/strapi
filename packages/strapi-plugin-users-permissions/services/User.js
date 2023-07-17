@@ -6,10 +6,10 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
-const { sanitizeEntity, getAbsoluteServerUrl } = require('strapi-utils');
+const { sanitizeEntity, getAbsoluteServerUrl } = require('@akemona-org/strapi-utils');
 
 module.exports = {
   /**
@@ -85,11 +85,14 @@ module.exports = {
   },
 
   hashPassword(user = {}) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       if (!user.password || this.isHashed(user.password)) {
         resolve(null);
       } else {
         bcrypt.hash(`${user.password}`, 10, (err, hash) => {
+          if (err) {
+            return reject(err);
+          }
           resolve(hash);
         });
       }
@@ -130,7 +133,7 @@ module.exports = {
 
     const settings = await pluginStore
       .get({ key: 'email' })
-      .then(storeEmail => storeEmail['email_confirmation'].options);
+      .then((storeEmail) => storeEmail['email_confirmation'].options);
 
     const userInfo = sanitizeEntity(user, {
       model: strapi.query('user', 'users-permissions').model,

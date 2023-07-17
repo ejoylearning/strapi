@@ -1,8 +1,11 @@
 {
-  "name": "strapi-database",
-  "version": "3.3.3",
+  "name": "@akemona-org/strapi-database",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "3.12.4",
   "description": "Strapi's database layer",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.akemona.com",
   "main": "./lib/index.js",
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -11,27 +14,28 @@
     "lib": "./lib"
   },
   "author": {
-    "name": "Strapi team",
-    "email": "hi@strapi.io",
-    "url": "http://strapi.io"
+    "name": "Akemona team",
+    "email": "strapi@akemona.com",
+    "url": "https://strapi.akemona.com"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/akemona/strapi.git"
   },
   "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+    "url": "https://github.com/akemona/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "lodash": "4.17.19",
+    "@akemona-org/strapi-utils": "3.12.4",
+    "debug": "4.3.1",
+    "lodash": "4.17.21",
     "p-map": "4.0.0",
-    "strapi-utils": "3.3.3",
     "verror": "^1.10.0"
   },
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "gitHead": "57095241bb8bc011c97ecbc8c7274b674b01cd0f"
 }

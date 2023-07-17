@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useStrapi, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { useStrapi, prefixFileUrlWithBackendUrl } from '@akemona-org/strapi-helper-plugin';
 import PropTypes from 'prop-types';
 
 const MediaLib = ({ isOpen, onChange, onToggle }) => {
@@ -19,12 +19,14 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
 
   const Component = getComponent('media-library').Component;
 
-  const handleInputChange = data => {
+  const handleInputChange = (data) => {
     if (data) {
-      const { name, alternativeText, url } = data;
-      const alt = alternativeText || name;
+      const formattedData = data.map(({ name, alternativeText, url }) => {
+        const alt = alternativeText || name;
 
-      setData({ alt, url: prefixFileUrlWithBackendUrl(url) });
+        return { alt, url: prefixFileUrlWithBackendUrl(url) };
+      });
+      setData(formattedData);
     }
   };
 
@@ -42,7 +44,7 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
       <Component
         allowedTypes={['images', 'videos', 'files']}
         isOpen={isOpen}
-        multiple={false}
+        multiple
         noNavigation
         onClosed={handleClosed}
         onInputMediaChange={handleInputChange}

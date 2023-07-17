@@ -1,5 +1,9 @@
 # Strapi Content Manager
 
+---
+
+### Maintenance release by Akemona
+
 ## Description
 
 This plugin allows you to manage your data through a UI.

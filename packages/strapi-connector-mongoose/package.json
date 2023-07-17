@@ -1,8 +1,11 @@
 {
-  "name": "strapi-connector-mongoose",
-  "version": "3.3.3",
+  "name": "@akemona-org/strapi-connector-mongoose",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "3.12.4",
   "description": "Mongoose hook for the Strapi framework",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.akemona.com",
   "keywords": [
     "mongoose",
     "hook",
@@ -15,40 +18,41 @@
   },
   "main": "./lib",
   "dependencies": {
-    "lodash": "4.17.19",
-    "mongoose": "5.10.8",
-    "mongoose-float": "^1.0.4",
-    "mongoose-long": "^0.3.2",
-    "pluralize": "^8.0.0",
-    "semver": "^7.3.2",
-    "strapi-utils": "3.3.3"
+    "@akemona-org/strapi-utils": "3.12.4",
+    "lodash": "4.17.21",
+    "mongoose": "7.0.3",
+    "mongoose-float": "1.0.4",
+    "mongoose-long": "0.6.0",
+    "p-map": "4.0.0",
+    "pluralize": "8.0.0",
+    "semver": "~7.3.8"
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "strapi@akemona.com",
+    "name": "Akemona team",
+    "url": "https://strapi.akemona.com"
   },
   "maintainers": [
     {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "name": "Akemona team",
+      "email": "strapi@akemona.com",
+      "url": "https://strapi.akemona.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/akemona/strapi.git"
   },
   "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+    "url": "https://github.com/akemona/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "test": "echo \"no tests yet\""
   },
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "gitHead": "57095241bb8bc011c97ecbc8c7274b674b01cd0f"
 }

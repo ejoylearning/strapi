@@ -47,12 +47,13 @@ const LeftMenuLinksSection = ({
               label={link.label}
               destination={link.destination}
               notificationsCount={link.notificationsCount || 0}
+              search={link.search}
             />
           ))
         ) : (
           <EmptyLinksListWrapper>
             <FormattedMessage id={emptyLinksListMessage} defaultMessage="No plugins installed yet">
-              {msg => <EmptyLinksList>{msg}</EmptyLinksList>}
+              {(msg) => <EmptyLinksList>{msg}</EmptyLinksList>}
             </FormattedMessage>
           </EmptyLinksListWrapper>
         )}

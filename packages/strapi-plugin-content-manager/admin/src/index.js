@@ -15,7 +15,7 @@ import lifecycles from './lifecycles';
 import reducers from './reducers';
 import trads from './translations';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const plugin = {
     blockerComponent: null,
@@ -32,6 +32,10 @@ export default strapi => {
         key: 'content-manager.link',
       },
     ],
+    injectionZones: {
+      editView: { informations: [] },
+      listView: { actions: [], deleteModalAdditionalInfos: [] },
+    },
     isReady: true,
     isRequired: pluginPkg.strapi.required || false,
     layout: null,

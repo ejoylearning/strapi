@@ -7,7 +7,6 @@
 // Public node modules.
 const _ = require('lodash');
 const { ApolloServer } = require('apollo-server-koa');
-const { buildFederatedSchema } = require('@apollo/federation');
 const depthLimit = require('graphql-depth-limit');
 const { graphqlUploadKoa } = require('graphql-upload');
 const loadConfigs = require('./load-config');
@@ -16,10 +15,10 @@ const attachMetadataToResolvers = (schema, { api, plugin }) => {
   const { resolver = {} } = schema;
   if (_.isEmpty(resolver)) return schema;
 
-  Object.keys(resolver).forEach(type => {
+  Object.keys(resolver).forEach((type) => {
     if (!_.isPlainObject(resolver[type])) return;
 
-    Object.keys(resolver[type]).forEach(resolverName => {
+    Object.keys(resolver[type]).forEach((resolverName) => {
       if (!_.isPlainObject(resolver[type][resolverName])) return;
 
       resolver[type][resolverName]['_metadatas'] = {
@@ -32,7 +31,7 @@ const attachMetadataToResolvers = (schema, { api, plugin }) => {
   return schema;
 };
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   const { appPath, installedPlugins } = strapi.config;
 
   return {
@@ -51,52 +50,38 @@ module.exports = strapi => {
       });
       _.merge(strapi, { api, plugins });
 
-      /*
-       * Create a merge of all the GraphQL configuration.
-       */
-      const apisSchemas = Object.keys(strapi.api || {}).map(key => {
+      // Create a merge of all the GraphQL configuration.
+      const apisSchemas = Object.keys(strapi.api || {}).map((key) => {
         const schema = _.get(strapi.api[key], 'config.schema.graphql', {});
         return attachMetadataToResolvers(schema, { api: key });
       });
 
-      const pluginsSchemas = Object.keys(strapi.plugins || {}).map(key => {
+      const pluginsSchemas = Object.keys(strapi.plugins || {}).map((key) => {
         const schema = _.get(strapi.plugins[key], 'config.schema.graphql', {});
         return attachMetadataToResolvers(schema, { plugin: key });
       });
 
-      const extensionsSchemas = Object.keys(extensions || {}).map(key => {
+      const extensionsSchemas = Object.keys(extensions || {}).map((key) => {
         const schema = _.get(extensions[key], 'config.schema.graphql', {});
         return attachMetadataToResolvers(schema, { plugin: key });
       });
 
-      const baseSchema = mergeSchemas([...apisSchemas, ...pluginsSchemas, ...extensionsSchemas]);
+      const baseSchema = mergeSchemas([...pluginsSchemas, ...extensionsSchemas, ...apisSchemas]);
 
       // save the final schema in the plugin's config
-      _.set(strapi, ['plugins', 'graphql', 'config', '_schema', 'graphql'], baseSchema);
+      _.set(strapi.plugins.graphql, 'config._schema.graphql', baseSchema);
     },
 
     initialize() {
-      const { typeDefs, resolvers } = strapi.plugins.graphql.services[
-        'schema-generator'
-      ].generateSchema();
+      const schema = strapi.plugins.graphql.services['schema-generator'].generateSchema();
 
-      if (_.isEmpty(typeDefs)) {
+      if (_.isEmpty(schema)) {
         strapi.log.warn('The GraphQL schema has not been generated because it is empty');
 
         return;
       }
 
       const config = _.get(strapi.plugins.graphql, 'config', {});
-
-      // Get federation config
-      const isFederated = _.get(config, 'federation', false);
-      const schemaDef = {};
-      if (isFederated) {
-        schemaDef.schema = buildFederatedSchema([{ typeDefs, resolvers }]);
-      } else {
-        schemaDef.typeDefs = typeDefs;
-        schemaDef.resolvers = resolvers;
-      }
 
       // TODO: Remove these deprecated options in favor of `apolloServer` in the next major version
       const deprecatedApolloServerConfig = {
@@ -105,7 +90,7 @@ module.exports = strapi => {
         engine: _.get(config, 'engine', false),
       };
 
-      if (['tracing', 'introspection', 'engine'].some(key => _.has(config, key))) {
+      if (['tracing', 'introspection', 'engine'].some((key) => _.has(config, key))) {
         strapi.log.warn(
           'The `tracing`, `introspection` and `engine` options are deprecated in favor of the `apolloServer` object and they will be removed in the next major version.'
         );
@@ -114,7 +99,7 @@ module.exports = strapi => {
       const apolloServerConfig = _.get(config, 'apolloServer', {});
 
       const serverParams = {
-        ...schemaDef,
+        schema,
         uploads: false,
         context: ({ ctx }) => {
           // Initiliase loaders for this request.
@@ -126,7 +111,7 @@ module.exports = strapi => {
             context: ctx,
           };
         },
-        formatError: err => {
+        formatError: (err) => {
           const formatError = _.get(config, 'formatError', null);
 
           return typeof formatError === 'function' ? formatError(err) : err;
@@ -162,6 +147,10 @@ module.exports = strapi => {
         app: strapi.app,
         path: config.endpoint,
       });
+
+      strapi.plugins.graphql.destroy = async () => {
+        await server.stop();
+      };
     },
   };
 };
@@ -170,7 +159,7 @@ module.exports = strapi => {
  * Merges a  list of schemas
  * @param {Array<Object>} schemas - The list of schemas to merge
  */
-const mergeSchemas = schemas => {
+const mergeSchemas = (schemas) => {
   return schemas.reduce((acc, el) => {
     const { definition, query, mutation, type, resolver } = el;
 

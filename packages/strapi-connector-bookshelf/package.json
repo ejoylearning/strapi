@@ -1,8 +1,11 @@
 {
-  "name": "strapi-connector-bookshelf",
-  "version": "3.3.3",
+  "name": "@akemona-org/strapi-connector-bookshelf",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "3.12.4",
   "description": "Bookshelf hook for the Strapi framework",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.akemona.com",
   "keywords": [
     "bookshelf",
     "hook",
@@ -16,17 +19,17 @@
   },
   "main": "./lib",
   "dependencies": {
-    "bookshelf": "^1.0.1",
-    "date-fns": "^2.8.1",
+    "@akemona-org/strapi-utils": "3.12.4",
+    "bookshelf": "1.2.0",
+    "date-fns": "^2.19.0",
     "inquirer": "^6.3.1",
-    "lodash": "4.17.19",
+    "lodash": "4.17.21",
     "p-map": "4.0.0",
     "pluralize": "^8.0.0",
-    "rimraf": "3.0.2",
-    "strapi-utils": "3.3.3"
+    "rimraf": "4.1.0"
   },
   "peerDependencies": {
-    "knex": "^0.20.0"
+    "knex": "2.4.0"
   },
   "strapi": {
     "dependencies": [
@@ -37,28 +40,28 @@
     "test": "echo not tests yet"
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "strapi@akemona.com",
+    "name": "Akemona team",
+    "url": "https://strapi.akemona.com"
   },
   "maintainers": [
     {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "name": "Akemona team",
+      "email": "strapi@akemona.com",
+      "url": "https://strapi.akemona.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/akemona/strapi.git"
   },
   "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+    "url": "https://github.com/akemona/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "gitHead": "57095241bb8bc011c97ecbc8c7274b674b01cd0f"
 }

@@ -2,11 +2,11 @@
 
 const _ = require('lodash');
 
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@akemona-org/strapi-utils');
 
 const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
-const formatError = error => [
+const formatError = (error) => [
   { messages: [{ id: error.id, message: error.message, field: error.field }] },
 ];
 
@@ -25,7 +25,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
     throw strapi.errors.notFound();
   }
 
-  const pm = strapi.admin.services.permission.createPermissionsManager(ability, action, model);
+  const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
   const roles = _.has(entity, `${CREATED_BY_ATTRIBUTE}.id`)
     ? await strapi.query('role', 'admin').find({ 'users.id': entity[CREATED_BY_ATTRIBUTE].id }, [])
@@ -51,11 +51,11 @@ module.exports = {
     } = ctx;
     const { email, username, password } = body;
 
-    const pm = strapi.admin.services.permission.createPermissionsManager(
-      userAbility,
-      ACTIONS.create,
-      userModel
-    );
+    const pm = strapi.admin.services.permission.createPermissionsManager({
+      ability: userAbility,
+      action: ACTIONS.create,
+      model: userModel,
+    });
 
     if (!pm.isAllowed) {
       throw strapi.errors.forbidden();

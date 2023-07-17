@@ -1,15 +1,14 @@
 import React, { memo } from 'react';
 import { Text } from '@buffetjs/core';
 import { FormattedMessage } from 'react-intl';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@akemona-org/strapi-helper-plugin';
 import Icon from './Icon';
 import Link from './Link';
 import Notif from './Notif';
 import Wrapper from './Wrapper';
 
 const ApplicationDetailLink = () => {
-  const { latestStrapiReleaseTag, strapiVersion } = useGlobalContext();
-  const showNotif = `v${strapiVersion}` !== latestStrapiReleaseTag;
+  const { shouldUpdateStrapi } = useGlobalContext();
 
   return (
     <Wrapper>
@@ -18,7 +17,7 @@ const ApplicationDetailLink = () => {
         <Text lineHeight="34px">
           <FormattedMessage id="Settings.application.title" />
         </Text>
-        {showNotif && <Notif />}
+        {shouldUpdateStrapi && <Notif />}
       </Link>
     </Wrapper>
   );

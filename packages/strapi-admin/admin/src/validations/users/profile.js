@@ -1,14 +1,10 @@
 import * as yup from 'yup';
-import { translatedErrors } from 'strapi-helper-plugin';
+import { translatedErrors } from '@akemona-org/strapi-helper-plugin';
 
 const schema = {
   firstname: yup.mixed().required(translatedErrors.required),
   lastname: yup.mixed().required(translatedErrors.required),
-  email: yup
-    .string()
-    .email(translatedErrors.email)
-    .lowercase()
-    .required(translatedErrors.required),
+  email: yup.string().email(translatedErrors.email).lowercase().required(translatedErrors.required),
   username: yup.string().nullable(),
   password: yup
     .string()
@@ -23,6 +19,7 @@ const schema = {
     .when('password', (password, passSchema) => {
       return password ? passSchema.required(translatedErrors.required) : passSchema;
     }),
+  preferedLanguage: yup.string().nullable(),
 };
 
 export default schema;

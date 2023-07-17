@@ -9,14 +9,15 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const _ = require('lodash');
 const util = require('util');
+const _ = require('lodash');
 const {
   nameToSlug,
   contentTypes: contentTypesUtils,
   sanitizeEntity,
   webhook: webhookUtils,
-} = require('strapi-utils');
+} = require('@akemona-org/strapi-utils');
+
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 
 const { bytesToKbytes } = require('../utils/file');
@@ -25,26 +26,26 @@ const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constan
 
 const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 
-const generateFileName = name => {
+const generateFileName = (name) => {
   const baseName = nameToSlug(name, { separator: '_', lowercase: false });
 
   return `${baseName}_${randomSuffix()}`;
 };
 
-const sendMediaMetrics = data => {
-  if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
+const sendMediaMetrics = (/* data */) => {
+  /* if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
     strapi.telemetry.send('didSaveMediaWithCaption');
   }
 
   if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
     strapi.telemetry.send('didSaveMediaWithAlternativeText');
-  }
+  } */
 };
 
-const combineFilters = params => {
+const combineFilters = (params) => {
   // FIXME: until we support boolean operators for querying we need to make mime_ncontains use AND instead of OR
   if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
-    params._where = params.mime_ncontains.map(val => ({ mime_ncontains: val }));
+    params._where = params.mime_ncontains.map((val) => ({ mime_ncontains: val }));
     delete params.mime_ncontains;
   }
 };
@@ -144,11 +145,8 @@ module.exports = {
   async uploadFileAndPersist(fileData, { user } = {}) {
     const config = strapi.plugins.upload.config;
 
-    const {
-      getDimensions,
-      generateThumbnail,
-      generateResponsiveFormats,
-    } = strapi.plugins.upload.services['image-manipulation'];
+    const { getDimensions, generateThumbnail, generateResponsiveFormats } =
+      strapi.plugins.upload.services['image-manipulation'];
 
     await strapi.plugins.upload.provider.upload(fileData);
 
@@ -205,11 +203,8 @@ module.exports = {
   async replace(id, { data, file }, { user } = {}) {
     const config = strapi.plugins.upload.config;
 
-    const {
-      getDimensions,
-      generateThumbnail,
-      generateResponsiveFormats,
-    } = strapi.plugins.upload.services['image-manipulation'];
+    const { getDimensions, generateThumbnail, generateResponsiveFormats } =
+      strapi.plugins.upload.services['image-manipulation'];
 
     const dbFile = await this.fetch({ id });
 
@@ -232,7 +227,7 @@ module.exports = {
 
       if (dbFile.formats) {
         await Promise.all(
-          Object.keys(dbFile.formats).map(key => {
+          Object.keys(dbFile.formats).map((key) => {
             return strapi.plugins.upload.provider.delete(dbFile.formats[key]);
           })
         );
@@ -304,17 +299,17 @@ module.exports = {
     return res;
   },
 
-  fetch(params) {
-    return strapi.query('file', 'upload').findOne(params);
+  fetch(params, populate) {
+    return strapi.query('file', 'upload').findOne(params, populate);
   },
 
-  fetchAll(params) {
+  fetchAll(params, populate) {
     combineFilters(params);
-    return strapi.query('file', 'upload').find(params);
+    return strapi.query('file', 'upload').find(params, populate);
   },
 
-  search(params) {
-    return strapi.query('file', 'upload').search(params);
+  search(params, populate) {
+    return strapi.query('file', 'upload').search(params, populate);
   },
 
   countSearch(params) {
@@ -335,7 +330,7 @@ module.exports = {
 
       if (file.formats) {
         await Promise.all(
-          Object.keys(file.formats).map(key => {
+          Object.keys(file.formats).map((key) => {
             return strapi.plugins.upload.provider.delete(file.formats[key]);
           })
         );
@@ -357,7 +352,7 @@ module.exports = {
 
     const arr = Array.isArray(files) ? files : [files];
     const enhancedFiles = await Promise.all(
-      arr.map(file => {
+      arr.map((file) => {
         return this.enhanceFile(
           file,
           {},
@@ -371,7 +366,7 @@ module.exports = {
       })
     );
 
-    await Promise.all(enhancedFiles.map(file => this.uploadFileAndPersist(file)));
+    await Promise.all(enhancedFiles.map((file) => this.uploadFileAndPersist(file)));
   },
 
   getSettings() {
@@ -385,11 +380,11 @@ module.exports = {
   },
 
   setSettings(value) {
-    if (value.responsiveDimensions === true) {
+    /*  if (value.responsiveDimensions === true) {
       strapi.telemetry.send('didEnableResponsiveDimensions');
     } else {
       strapi.telemetry.send('didDisableResponsiveDimensions');
-    }
+    } */
 
     return strapi
       .store({

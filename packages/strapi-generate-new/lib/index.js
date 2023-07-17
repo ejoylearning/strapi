@@ -3,10 +3,9 @@
 const { join, resolve, basename } = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const chalk = require('chalk');
 const { machineIdSync } = require('node-machine-id');
 const uuid = require('uuid/v4');
-const sentry = require('@sentry/node');
+// const sentry = require('@sentry/node');
 
 const hasYarn = require('./utils/has-yarn');
 const checkRequirements = require('./utils/check-requirements');
@@ -14,13 +13,12 @@ const { trackError, captureException } = require('./utils/usage');
 const parseDatabaseArguments = require('./utils/parse-db-arguments');
 const generateNew = require('./generate-new');
 
-sentry.init({
-  dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
-});
+// sentry.init({
+//   dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
+// });
 
 module.exports = (projectDirectory, cliArguments) => {
   checkRequirements();
-
   const rootPath = resolve(projectDirectory);
 
   const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
@@ -33,31 +31,37 @@ module.exports = (projectDirectory, cliArguments) => {
     // disable quickstart run app after creation
     runQuickstartApp: cliArguments.run === false ? false : true,
     // use pacakge version as strapiVersion (all packages have the same version);
+    // eslint-disable-next-line import/extensions
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
-    quick: cliArguments.quickstart !== undefined,
+    quick: cliArguments.quickstart,
     template: cliArguments.template,
-    docker: process.env.DOCKER === 'true',
+    packageJsonStrapi: {
+      template: cliArguments.template,
+      starter: cliArguments.starter,
+    },
     uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuid(),
+    docker: process.env.DOCKER === 'true',
     deviceId: machineIdSync(),
     tmpPath,
     // use yarn if available and --use-npm isn't true
     useYarn: !useNpm && hasYarn(),
     installDependencies: true,
     strapiDependencies: [
-      'strapi',
-      'strapi-admin',
-      'strapi-utils',
-      'strapi-plugin-content-type-builder',
-      'strapi-plugin-content-manager',
-      'strapi-plugin-users-permissions',
-      'strapi-plugin-email',
-      'strapi-plugin-upload',
+      '@akemona-org/strapi',
+      '@akemona-org/strapi-admin',
+      '@akemona-org/strapi-utils',
+      '@akemona-org/strapi-plugin-content-type-builder',
+      '@akemona-org/strapi-plugin-content-manager',
+      '@akemona-org/strapi-plugin-users-permissions',
+      '@akemona-org/strapi-plugin-email',
+      '@akemona-org/strapi-plugin-upload',
+      '@akemona-org/strapi-plugin-i18n',
     ],
     additionalsDependencies: {},
   };
 
-  sentry.configureScope(function(sentryScope) {
+  /* sentry.configureScope(function (sentryScope) {
     const tags = {
       os_type: os.type(),
       os_platform: os.platform(),
@@ -67,18 +71,15 @@ module.exports = (projectDirectory, cliArguments) => {
       docker: scope.docker,
     };
 
-    Object.keys(tags).forEach(tag => {
+    Object.keys(tags).forEach((tag) => {
       sentryScope.setTag(tag, tags[tag]);
     });
-  });
+  }); */
 
   parseDatabaseArguments({ scope, args: cliArguments });
   initCancelCatcher(scope);
 
-  console.log(`Creating a new Strapi application at ${chalk.green(rootPath)}.`);
-  console.log();
-
-  return generateNew(scope).catch(error => {
+  return generateNew(scope).catch((error) => {
     console.error(error);
     return captureException(error).then(() => {
       return trackError({ scope, error }).then(() => {
@@ -96,7 +97,7 @@ function initCancelCatcher() {
       output: process.stdout,
     });
 
-    rl.on('SIGINT', function() {
+    rl.on('SIGINT', function () {
       process.emit('SIGINT');
     });
   }

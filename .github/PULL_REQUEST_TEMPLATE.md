@@ -8,7 +8,7 @@ To help us merge your PR, make sure to follow the instructions below:
 - Refer to the issue you are closing in the PR description - fix #issue
 - Specify if the PR is in WIP (work in progress) state or ready to be merged
 
-Please ensure you read through the Contributing Guide: https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md
+Please ensure you read through the Contributing Guide: https://github.com/akemona/strapi/blob/master/CONTRIBUTING.md
 -->
 
 ### What does it do?
@@ -18,6 +18,10 @@ Describe the technical changes you did.
 ### Why is it needed?
 
 Describe the issue you are solving.
+
+### How to test it?
+
+Provide information about the environment and the path to verify the behaviour.
 
 ### Related issue(s)/PR(s)
 

@@ -6,12 +6,12 @@ const sharp = require('sharp');
 
 const { bytesToKbytes } = require('../utils/file');
 
-const getMetadatas = buffer =>
+const getMetadatas = (buffer) =>
   sharp(buffer)
     .metadata()
     .catch(() => ({})); // ignore errors
 
-const getDimensions = buffer =>
+const getDimensions = (buffer) =>
   getMetadatas(buffer)
     .then(({ width = null, height = null }) => ({ width, height }))
     .catch(() => ({})); // ignore errors
@@ -24,11 +24,12 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 
 const resizeTo = (buffer, options) =>
   sharp(buffer)
+    .withMetadata()
     .resize(options)
     .toBuffer()
     .catch(() => null);
 
-const generateThumbnail = async file => {
+const generateThumbnail = async (file) => {
   if (!(await canBeProccessed(file.buffer))) {
     return null;
   }
@@ -58,40 +59,44 @@ const generateThumbnail = async file => {
   return null;
 };
 
-const optimize = async buffer => {
-  const {
-    sizeOptimization = false,
-    autoOrientation = false,
-  } = await strapi.plugins.upload.services.upload.getSettings();
+const optimize = async (buffer) => {
+  const { sizeOptimization = false, autoOrientation = false } =
+    await strapi.plugins.upload.services.upload.getSettings();
 
   if (!sizeOptimization || !(await canBeProccessed(buffer))) {
     return { buffer };
   }
 
   const sharpInstance = autoOrientation ? sharp(buffer).rotate() : sharp(buffer);
+
   return sharpInstance
     .toBuffer({ resolveWithObject: true })
-    .then(({ data, info }) => ({
-      buffer: data,
-      info: {
-        width: info.width,
-        height: info.height,
-        size: bytesToKbytes(info.size),
-      },
-    }))
+    .then(({ data, info }) => {
+      const output = buffer.length < data.length ? buffer : data;
+
+      return {
+        buffer: output,
+        info: {
+          width: info.width,
+          height: info.height,
+          size: bytesToKbytes(output.length),
+        },
+      };
+    })
     .catch(() => ({ buffer }));
 };
 
-const BREAKPOINTS = {
+const DEFAULT_BREAKPOINTS = {
   large: 1000,
   medium: 750,
   small: 500,
 };
 
-const generateResponsiveFormats = async file => {
-  const {
-    responsiveDimensions = false,
-  } = await strapi.plugins.upload.services.upload.getSettings();
+const getBreakpoints = () => strapi.config.get('plugins.upload.breakpoints', DEFAULT_BREAKPOINTS);
+
+const generateResponsiveFormats = async (file) => {
+  const { responsiveDimensions = false } =
+    await strapi.plugins.upload.services.upload.getSettings();
 
   if (!responsiveDimensions) return [];
 
@@ -101,9 +106,10 @@ const generateResponsiveFormats = async file => {
 
   const originalDimensions = await getDimensions(file.buffer);
 
+  const breakpoints = getBreakpoints();
   return Promise.all(
-    Object.keys(BREAKPOINTS).map(key => {
-      const breakpoint = BREAKPOINTS[key];
+    Object.keys(breakpoints).map((key) => {
+      const breakpoint = breakpoints[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
         return generateBreakpoint(key, { file, breakpoint, originalDimensions });
@@ -144,7 +150,7 @@ const breakpointSmallerThan = (breakpoint, { width, height }) => {
 };
 
 const formatsToProccess = ['jpeg', 'png', 'webp', 'tiff'];
-const canBeProccessed = async buffer => {
+const canBeProccessed = async (buffer) => {
   const { format } = await getMetadatas(buffer);
   return format && formatsToProccess.includes(format);
 };

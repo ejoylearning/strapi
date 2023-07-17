@@ -1,9 +1,10 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('strapi-utils');
+const { isUndefined } = require('lodash/fp');
+const { yup, formatYupErrors } = require('@akemona-org/strapi-utils');
 const validators = require('./common-validators');
 
-const handleReject = error => Promise.reject(formatYupErrors(error));
+const handleReject = (error) => Promise.reject(formatYupErrors(error));
 
 const userCreationSchema = yup
   .object()
@@ -12,10 +13,11 @@ const userCreationSchema = yup
     firstname: validators.firstname.required(),
     lastname: validators.lastname.required(),
     roles: validators.roles.min(1),
+    preferedLanguage: yup.string().nullable(),
   })
   .noUnknown();
 
-const validateUserCreationInput = data => {
+const validateUserCreationInput = (data) => {
   return userCreationSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 
@@ -27,10 +29,15 @@ const profileUpdateSchema = yup
     lastname: validators.lastname.notNull(),
     username: validators.username.nullable(),
     password: validators.password.notNull(),
+    currentPassword: yup
+      .string()
+      .when('password', (password, schema) => (!isUndefined(password) ? schema.required() : schema))
+      .notNull(),
+    preferedLanguage: yup.string().nullable(),
   })
   .noUnknown();
 
-const validateProfileUpdateInput = data => {
+const validateProfileUpdateInput = (data) => {
   return profileUpdateSchema
     .validate(data, { strict: true, abortEarly: false })
     .catch(handleReject);
@@ -49,22 +56,18 @@ const userUpdateSchema = yup
   })
   .noUnknown();
 
-const validateUserUpdateInput = data => {
+const validateUserUpdateInput = (data) => {
   return userUpdateSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 
 const usersDeleteSchema = yup
   .object()
   .shape({
-    ids: yup
-      .array()
-      .of(yup.strapiID())
-      .min(1)
-      .required(),
+    ids: yup.array().of(yup.strapiID()).min(1).required(),
   })
   .noUnknown();
 
-const validateUsersDeleteInput = async data => {
+const validateUsersDeleteInput = async (data) => {
   return usersDeleteSchema.validate(data, { strict: true, abortEarly: false }).catch(handleReject);
 };
 
@@ -73,4 +76,10 @@ module.exports = {
   validateProfileUpdateInput,
   validateUserUpdateInput,
   validateUsersDeleteInput,
+
+  schemas: {
+    userCreationSchema,
+    usersDeleteSchema,
+    userUpdateSchema,
+  },
 };

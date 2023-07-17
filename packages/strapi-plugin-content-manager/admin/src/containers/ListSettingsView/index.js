@@ -1,18 +1,13 @@
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
+import React, { memo, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, get } from 'lodash';
-import {
-  // utils
-  request,
-  // contexts
-  useGlobalContext,
-} from 'strapi-helper-plugin';
-import { FormattedMessage } from 'react-intl';
+import { get, pick } from 'lodash';
+import { request, useGlobalContext } from '@akemona-org/strapi-helper-plugin';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import pluginId from '../../pluginId';
-import { ItemTypes, getRequestUrl } from '../../utils';
+import { checkIfAttributeIsDisplayable, ItemTypes, getRequestUrl } from '../../utils';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
@@ -22,60 +17,27 @@ import MenuDropdown from './MenuDropdown';
 import DropdownButton from './DropdownButton';
 import DragWrapper from './DragWrapper';
 import Toggle from './Toggle';
+import init from './init';
 import reducer, { initialState } from './reducer';
 import forms from './forms.json';
 
-const ListSettingsView = ({ deleteLayout, slug }) => {
-  const [reducerState, dispatch] = useReducer(reducer, initialState);
+const ListSettingsView = ({ layout, slug, updateLayout }) => {
+  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, layout)
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
-
-  const { emitEvent } = useGlobalContext();
-
-  const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
-
-  const { labelForm, labelToEdit, initialData, modifiedData, isLoading } = reducerState.toJS();
-
-  const abortController = new AbortController();
-  const { signal } = abortController;
-
+  const { formatMessage } = useIntl();
+  const { emitEvent, updateMenu } = useGlobalContext();
+  const toggleModalForm = () => setIsModalFormOpen((prevState) => !prevState);
+  const { labelForm, labelToEdit, initialData, modifiedData } = reducerState.toJS();
   const attributes = useMemo(() => {
-    return get(modifiedData, ['schema', 'attributes'], {});
+    return get(modifiedData, ['attributes'], {});
   }, [modifiedData]);
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const { data } = await request(getRequestUrl(`content-types/${slug}`), {
-          method: 'GET',
-          signal,
-        });
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data: data.contentType,
-        });
-      } catch (err) {
-        if (err.code !== 20) {
-          strapi.notification.toggle({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-        }
-      }
-    };
-
-    getData();
-
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
-
   const getName = useMemo(() => {
-    return get(modifiedData, ['schema', 'info', 'name'], '');
+    return get(modifiedData, ['info', 'name'], '');
   }, [modifiedData]);
 
   const displayedFields = useMemo(() => {
@@ -86,17 +48,16 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
     const metadatas = get(modifiedData, ['metadatas'], {});
 
     return Object.keys(metadatas)
-      .filter(key => {
-        const type = get(attributes, [key, 'type'], '');
-
-        return !['json', 'component', 'richtext', 'relation'].includes(type) && !!type;
+      .filter((key) => {
+        return checkIfAttributeIsDisplayable(get(attributes, key, {}));
       })
-      .filter(field => {
+      .filter((field) => {
         return !displayedFields.includes(field);
-      });
+      })
+      .sort();
   }, [displayedFields, attributes, modifiedData]);
 
-  const handleClickEditLabel = labelToEdit => {
+  const handleClickEditLabel = (labelToEdit) => {
     dispatch({
       type: 'SET_LABEL_TO_EDIT',
       labelToEdit,
@@ -128,22 +89,18 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 
   const handleConfirm = async () => {
     try {
-      const body = cloneDeep(modifiedData);
+      const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
 
-      delete body.apiID;
-      delete body.schema;
-      delete body.uid;
-
-      await request(getRequestUrl(`content-types/${slug}`), {
+      const response = await request(getRequestUrl(`content-types/${slug}/configuration`), {
         method: 'PUT',
         body,
-        signal,
       });
+
+      updateLayout(response.data);
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      deleteLayout(slug);
       emitEvent('didEditListSettings');
     } catch (err) {
       strapi.notification.toggle({
@@ -163,44 +120,48 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 
   const [, drop] = useDrop({ accept: ItemTypes.FIELD });
 
-  const renderForm = () => (
-    <>
-      <div className="col-6" style={{ marginBottom: 4 }}>
-        <FormattedMessage id={`${pluginId}.form.Input.label`}>
-          {label => (
-            <FormattedMessage id={`${pluginId}.form.Input.label.inputDescription`}>
-              {description => (
+  const renderForm = () => {
+    const type = get(attributes, [labelToEdit, 'type'], 'text');
+    const relationType = get(attributes, [labelToEdit, 'relationType']);
+    let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
+    const label = formatMessage({ id: `${pluginId}.form.Input.label` });
+    const description = formatMessage({ id: `${pluginId}.form.Input.label.inputDescription` });
+
+    if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
+      shouldDisplaySortToggle = true;
+    }
+
+    return (
+      <>
+        <div className="col-6" style={{ marginBottom: 4 }}>
+          <Input
+            description={description}
+            label={label}
+            type="text"
+            name="label"
+            onBlur={() => {}}
+            value={get(labelForm, 'label', '')}
+            onChange={handleChangeEditLabel}
+          />
+        </div>
+        {shouldDisplaySortToggle && (
+          <div className="col-6" style={{ marginBottom: 4 }}>
+            <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
+              {(label) => (
                 <Input
-                  description={description}
                   label={label}
-                  type="text"
-                  name="label"
-                  onBlur={() => {}}
-                  value={get(labelForm, 'label', '')}
+                  type="bool"
+                  name="sortable"
+                  value={get(labelForm, 'sortable', false)}
                   onChange={handleChangeEditLabel}
                 />
               )}
             </FormattedMessage>
-          )}
-        </FormattedMessage>
-      </div>
-      {get(attributes, [labelToEdit, 'type'], 'text') !== 'media' && (
-        <div className="col-6" style={{ marginBottom: 4 }}>
-          <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
-            {label => (
-              <Input
-                label={label}
-                type="bool"
-                name="sortable"
-                value={get(labelForm, 'sortable', false)}
-                onChange={handleChangeEditLabel}
-              />
-            )}
-          </FormattedMessage>
-        </div>
-      )}
-    </>
-  );
+          </div>
+        )}
+      </>
+    );
+  };
 
   return (
     <LayoutDndProvider
@@ -210,7 +171,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
       <SettingsViewWrapper
         displayedFields={displayedFields}
         inputs={forms}
-        isLoading={isLoading}
+        isLoading={false}
         initialData={initialData}
         modifiedData={modifiedData}
         onChange={handleChange}
@@ -220,6 +181,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
           });
         }}
         onConfirmSubmit={handleConfirm}
+        onModalConfirmClosed={updateMenu}
         name={getName}
       >
         <DragWrapper>
@@ -245,7 +207,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
                       move={move}
                       name={item}
                       onClick={handleClickEditLabel}
-                      onRemove={e => {
+                      onRemove={(e) => {
                         e.stopPropagation();
 
                         if (displayedFields.length === 1) {
@@ -272,7 +234,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
             isOpen={isOpen}
             toggle={() => {
               if (listRemainingFields.length > 0) {
-                setIsOpen(prevState => !prevState);
+                setIsOpen((prevState) => !prevState);
               }
             }}
             direction="down"
@@ -284,7 +246,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
           >
             <Toggle disabled={listRemainingFields.length === 0} />
             <MenuDropdown>
-              {listRemainingFields.map(item => (
+              {listRemainingFields.map((item) => (
                 <DropdownItem
                   key={item}
                   onClick={() => {
@@ -305,7 +267,7 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
         headerId={`${pluginId}.containers.ListSettingsView.modal-form.edit-label`}
         isOpen={isModalFormOpen}
         onClosed={handleClosed}
-        onSubmit={e => {
+        onSubmit={(e) => {
           e.preventDefault();
           toggleModalForm();
           dispatch({
@@ -322,11 +284,15 @@ const ListSettingsView = ({ deleteLayout, slug }) => {
 };
 
 ListSettingsView.propTypes = {
-  deleteLayout: PropTypes.func.isRequired,
-  location: PropTypes.shape({
-    search: PropTypes.string.isRequired,
+  layout: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+    settings: PropTypes.object.isRequired,
+    metadatas: PropTypes.object.isRequired,
+    options: PropTypes.object.isRequired,
+    attributes: PropTypes.object.isRequired,
   }).isRequired,
   slug: PropTypes.string.isRequired,
+  updateLayout: PropTypes.func.isRequired,
 };
 
-export default ListSettingsView;
+export default memo(ListSettingsView);

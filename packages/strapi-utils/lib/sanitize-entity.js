@@ -1,16 +1,24 @@
 'use strict';
 
 const _ = require('lodash');
-const { constants, isPrivateAttribute } = require('./content-types');
 const {
-  ID_ATTRIBUTE,
-  PUBLISHED_AT_ATTRIBUTE,
-  CREATED_BY_ATTRIBUTE,
-  UPDATED_BY_ATTRIBUTE,
-} = constants;
+  constants,
+  isPrivateAttribute,
+  getNonWritableAttributes,
+  getNonVisibleAttributes,
+  getWritableAttributes,
+} = require('./content-types');
+
+const { ID_ATTRIBUTE } = constants;
 
 const sanitizeEntity = (dataSource, options) => {
-  const { model, withPrivate = false, isOutput = true, includeFields = null } = options;
+  const {
+    model,
+    withHidden = true,
+    withPrivate = false,
+    isOutput = true,
+    includeFields = null,
+  } = options;
 
   if (typeof dataSource !== 'object' || _.isNil(dataSource)) {
     return dataSource;
@@ -23,11 +31,15 @@ const sanitizeEntity = (dataSource, options) => {
   }
 
   if (_.isArray(data)) {
-    return data.map(entity => sanitizeEntity(entity, options));
+    return data.map((entity) => sanitizeEntity(entity, options));
   }
 
   if (_.isNil(model)) {
-    return null;
+    if (isOutput) {
+      return null;
+    } else {
+      return data;
+    }
   }
 
   const { attributes } = model;
@@ -37,7 +49,7 @@ const sanitizeEntity = (dataSource, options) => {
     const attribute = attributes[key];
     const allowedFieldsHasKey = allowedFields.includes(key);
 
-    if (shouldRemoveAttribute(model, key, attribute, { withPrivate, isOutput })) {
+    if (shouldRemoveAttribute(model, key, attribute, { withHidden, withPrivate, isOutput })) {
       return acc;
     }
 
@@ -56,16 +68,34 @@ const sanitizeEntity = (dataSource, options) => {
         return acc;
       }
 
-      const nextOptions = {
-        model: strapi.getModel(relation, attribute.plugin),
+      const baseOptions = {
         withPrivate,
+        withHidden,
         isOutput,
         includeFields: nextFields,
       };
 
-      const nextVal = Array.isArray(value)
-        ? value.map(elem => sanitizeEntity(elem, nextOptions))
-        : sanitizeEntity(value, nextOptions);
+      let sanitizeFn;
+      if (relation === '*') {
+        sanitizeFn = (entity) => {
+          if (_.isNil(entity) || !_.has(entity, '__contentType')) {
+            return entity;
+          }
+
+          return sanitizeEntity(entity, {
+            model: strapi.db.getModelByGlobalId(entity.__contentType),
+            ...baseOptions,
+          });
+        };
+      } else {
+        sanitizeFn = (entity) =>
+          sanitizeEntity(entity, {
+            model: strapi.getModel(relation, attribute.plugin),
+            ...baseOptions,
+          });
+      }
+
+      const nextVal = Array.isArray(value) ? value.map(sanitizeFn) : sanitizeFn(value);
 
       return { ...acc, [key]: nextVal };
     }
@@ -74,10 +104,11 @@ const sanitizeEntity = (dataSource, options) => {
 
     // Dynamic zones
     if (attribute && attribute.type === 'dynamiczone' && value !== null && isAllowedField) {
-      const nextVal = value.map(elem =>
+      const nextVal = value.map((elem) =>
         sanitizeEntity(elem, {
           model: strapi.getModel(elem.__component),
           withPrivate,
+          withHidden,
           isOutput,
         })
       );
@@ -95,13 +126,19 @@ const sanitizeEntity = (dataSource, options) => {
   return _.reduce(data, reducerFn, {});
 };
 
-const parseOriginalData = data => (_.isFunction(data.toJSON) ? data.toJSON() : data);
+const parseOriginalData = (data) => (_.isFunction(data.toJSON) ? data.toJSON() : data);
 
 const COMPONENT_FIELDS = ['__component'];
 const STATIC_FIELDS = [ID_ATTRIBUTE, '__v'];
 
 const getAllowedFields = ({ includeFields, model, isOutput }) => {
   const { options, primaryKey } = model;
+  const nonWritableAttributes = getNonWritableAttributes(model);
+  const nonVisibleAttributes = getNonVisibleAttributes(model);
+
+  const writableAttributes = getWritableAttributes(model);
+
+  const nonVisibleWritableAttributes = _.intersection(writableAttributes, nonVisibleAttributes);
 
   const timestamps = options.timestamps || [];
 
@@ -113,11 +150,10 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
           timestamps,
           STATIC_FIELDS,
           COMPONENT_FIELDS,
-          CREATED_BY_ATTRIBUTE,
-          UPDATED_BY_ATTRIBUTE,
-          PUBLISHED_AT_ATTRIBUTE,
+          ...nonWritableAttributes,
+          ...nonVisibleAttributes,
         ]
-      : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS])
+      : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS, ...nonVisibleWritableAttributes])
   );
 };
 
@@ -125,8 +161,8 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   const searchStr = `${key}.`;
 
   const transformedFields = (fields || [])
-    .filter(field => field.startsWith(searchStr))
-    .map(field => field.replace(searchStr, ''));
+    .filter((field) => field.startsWith(searchStr))
+    .map((field) => field.replace(searchStr, ''));
 
   const isAllowed = allowedFieldsHasKey || transformedFields.length > 0;
   const nextFields = allowedFieldsHasKey ? null : transformedFields;
@@ -134,14 +170,25 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   return [nextFields, isAllowed];
 };
 
-const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutput }) => {
+const shouldRemoveAttribute = (
+  model,
+  key,
+  attribute = {},
+  { withPrivate, withHidden, isOutput }
+) => {
   const isPassword = attribute.type === 'password';
   const isPrivate = isPrivateAttribute(model, key);
+  const isHidden = _.get(model, ['config', 'attributes', key, 'hidden'], false);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;
+  const shouldRemoveHidden = !withHidden;
 
-  return !!((isPassword && shouldRemovePassword) || (isPrivate && shouldRemovePrivate));
+  return !!(
+    (isPassword && shouldRemovePassword) ||
+    (isPrivate && shouldRemovePrivate) ||
+    (isHidden && shouldRemoveHidden)
+  );
 };
 
 module.exports = sanitizeEntity;

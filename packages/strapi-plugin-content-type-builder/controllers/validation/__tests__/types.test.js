@@ -1,6 +1,48 @@
+'use strict';
+
 const getTypeValidator = require('../types');
 
 describe('Type validators', () => {
+  describe.each(['collectionType', 'singleType'])('mixed type', (kind) => {
+    test('pluginOptions can be used', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          pluginOptions: {
+            i18n: {
+              localized: false,
+            },
+          },
+        },
+      };
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        modelType: kind,
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.title)).toBe(true);
+    });
+
+    test('can use custom keys', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          myCustomKey: true,
+        },
+      };
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        modelType: kind,
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.title)).toBe(true);
+    });
+  });
+
   describe('UID type validator', () => {
     test('Target field can be null', () => {
       const attributes = {
@@ -111,7 +153,7 @@ describe('Type validators', () => {
       'datetime',
       'timestamp',
       'boolean',
-    ])('Target field cannot be %s', type => {
+    ])('Target field cannot be %s', (type) => {
       const attributes = {
         title: {
           type,
@@ -291,7 +333,7 @@ describe('Type validators', () => {
       expect(validator.isValidSync(attributes.img)).toBe(true);
     });
 
-    test.each(['images', 'files', 'videos'])('%s is an allowed types', type => {
+    test.each(['images', 'files', 'videos'])('%s is an allowed types', (type) => {
       const attributes = {
         img: {
           type: 'media',

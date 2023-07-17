@@ -14,7 +14,7 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Row } from 'reactstrap';
 import { Inputs } from '@buffetjs/custom';
-import { useGlobalContext, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { useGlobalContext, prefixFileUrlWithBackendUrl } from '@akemona-org/strapi-helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import { createFileToDownloadName } from '../../utils';
@@ -125,7 +125,7 @@ const EditForm = forwardRef(
     };
 
     const handleToggleCropMode = () => {
-      setIsCropping(prev => {
+      setIsCropping((prev) => {
         if (!prev && isEditingUploadedFile) {
           toggleDisableForm(true);
         }
@@ -154,7 +154,7 @@ const EditForm = forwardRef(
           const canvas = cropper.current.getCroppedCanvas();
 
           canvas.toBlob(
-            async blob => {
+            async (blob) => {
               const {
                 file: { lastModifiedDate, lastModified, name },
               } = fileToEdit;
@@ -201,7 +201,7 @@ const EditForm = forwardRef(
 
     const handleClickDownload = () => {
       axios
-        .get(prefixedFileURL, {
+        .get(prefixFileUrlWithBackendUrl(fileURL), {
           responseType: 'blob',
         })
         .then(({ data }) => {
@@ -212,12 +212,12 @@ const EditForm = forwardRef(
 
           aRef.current.click();
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
         });
     };
 
-    const handleSubmit = e => {
+    const handleSubmit = (e) => {
       e.preventDefault();
 
       onSubmitEdit(e);
@@ -340,7 +340,7 @@ const EditForm = forwardRef(
                   {form.map(({ key, inputs }) => {
                     return (
                       <Row key={key}>
-                        {inputs.map(input => {
+                        {inputs.map((input) => {
                           return (
                             <div className="col-12" key={input.name}>
                               <Inputs
@@ -402,7 +402,7 @@ EditForm.defaultProps = {
   onAbortUpload: () => {},
   onChange: () => {},
   onClickDeleteFileToUpload: () => {},
-  onSubmitEdit: e => e.preventDefault(),
+  onSubmitEdit: (e) => e.preventDefault(),
   setCropResult: () => {},
   toggleDisableForm: () => {},
 };

@@ -1,21 +1,20 @@
+'use strict';
 /* eslint-disable no-useless-escape */
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
 const webpack = require('webpack');
-const getWebpackConfig = require('./webpack.config.js');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
-// eslint-disable-next-line node/no-extraneous-require
-const hasEE = require('strapi/lib/utils/ee');
+const getWebpackConfig = require('./webpack.config');
 
-const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
+const getPkgPath = (name) => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
   const adminConfigPath = path.join(dir, 'admin', 'admin.config.js');
 
-  let webpackConfig = getWebpackConfig({ useEE: hasEE({ dir }), ...config });
+  let webpackConfig = getWebpackConfig({ useEE: /* hasEE({ dir }) */ false, ...config });
 
   if (fs.existsSync(adminConfigPath)) {
     const adminConfig = require(path.resolve(adminConfigPath));
@@ -103,15 +102,19 @@ window.strapi = Object.assign(window.strapi || {}, {
 
 module.exports = {
   ${plugins
-    .map(name => {
-      const shortName = name.replace(/^strapi-plugin-/i, '');
+    .map((name) => {
+      const shortName = name.startsWith('@akemona-org')
+        ? name.replace(/^@akemona-org\/strapi-plugin-/i, '')
+        : name.replace(/^strapi-plugin-/i, '');
       const req = `require('../../plugins/${name}/admin/src').default`;
       return `'${shortName}': ${req},`;
     })
     .join('\n')}
   ${localPlugins
-    .map(name => {
-      const shortName = name.replace(/^strapi-plugin-/i, '');
+    .map((name) => {
+      const shortName = name.startsWith('@akemona-org')
+        ? name.replace(/^@akemona-org\/strapi-plugin-/i, '')
+        : name.replace(/^strapi-plugin-/i, '');
       const req = `require('../../../plugins/${name}/admin/src').default`;
       return `'${shortName}': ${req}`;
     })
@@ -153,10 +156,11 @@ async function copyPlugin(name, dest) {
 }
 
 async function copyAdmin(dest) {
-  const adminPath = getPkgPath('strapi-admin');
+  const adminPath = getPkgPath('@akemona-org/strapi-admin');
 
   // TODO copy ee folders for plugins
-  await fs.copy(path.resolve(adminPath, 'ee', 'admin'), path.resolve(dest, 'ee', 'admin'));
+  // disable ee copy
+  // await fs.copy(path.resolve(adminPath, 'ee', 'admin'), path.resolve(dest, 'ee', 'admin'));
 
   await fs.ensureDir(path.resolve(dest, 'config'));
   await fs.copy(path.resolve(adminPath, 'admin'), path.resolve(dest, 'admin'));
@@ -179,8 +183,8 @@ async function createCacheDir(dir) {
   const pkgJSON = require(path.join(dir, 'package.json'));
 
   const pluginsToCopy = Object.keys(pkgJSON.dependencies).filter(
-    dep =>
-      dep.startsWith('strapi-plugin') &&
+    (dep) =>
+      dep.startsWith('@akemona-org/strapi-plugin') &&
       fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
   );
 
@@ -188,7 +192,7 @@ async function createCacheDir(dir) {
   if (fs.existsSync(path.join(dir, 'plugins'))) {
     localPluginsToCopy = fs
       .readdirSync(path.join(dir, 'plugins'))
-      .filter(plugin =>
+      .filter((plugin) =>
         fs.existsSync(path.resolve(dir, 'plugins', plugin, 'admin', 'src', 'index.js'))
       );
   }
@@ -202,7 +206,7 @@ async function createCacheDir(dir) {
   await copyAdmin(cacheDir);
 
   // copy plugins code
-  await Promise.all(pluginsToCopy.map(name => copyPlugin(name, cacheDir)));
+  await Promise.all(pluginsToCopy.map((name) => copyPlugin(name, cacheDir)));
 
   // override admin code with user customizations
   if (fs.pathExistsSync(path.join(dir, 'admin'))) {
@@ -214,7 +218,9 @@ async function createCacheDir(dir) {
 
   // override plugins' admin code with user customizations
   const pluginsToOverride = pluginsToCopy.reduce((acc, current) => {
-    const pluginName = current.replace(/^strapi-plugin-/i, '');
+    const pluginName = current.startsWith('@akemona-org')
+      ? current.replace(/^@akemona-org\/strapi-plugin-/i, '')
+      : current.replace(/^strapi-plugin-/i, '');
 
     if (fs.pathExistsSync(path.join(dir, 'extensions', pluginName, 'admin'))) {
       acc.push(pluginName);
@@ -224,7 +230,7 @@ async function createCacheDir(dir) {
   }, []);
 
   await Promise.all(
-    pluginsToOverride.map(plugin =>
+    pluginsToOverride.map((plugin) =>
       copyCustomAdmin(
         path.join(dir, 'extensions', plugin, 'admin'),
         path.join(cacheDir, 'plugins', `strapi-plugin-${plugin}`)
@@ -249,21 +255,22 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     options,
   };
 
+  const webpackConfig = getCustomWebpackConfig(dir, args);
   const opts = {
     clientLogLevel: 'silent',
-    hot: true,
     quiet: true,
     open: browser === 'true' ? true : browser,
     publicPath: options.publicPath,
     historyApiFallback: {
       index: options.publicPath,
+      disableDotRule: true,
     },
+    ...webpack(webpackConfig).options.devServer,
   };
 
-  const webpackConfig = getCustomWebpackConfig(dir, args);
   const server = new WebpackDevServer(webpack(webpackConfig), opts);
 
-  server.listen(port, host, function(err) {
+  server.listen(port, host, function (err) {
     if (err) {
       console.log(err);
     }
@@ -283,12 +290,18 @@ async function watchFiles(dir, ignoreFiles = []) {
   const extensionsPath = path.join(dir, 'extensions');
 
   const appPlugins = Object.keys(pkgJSON.dependencies).filter(
-    dep =>
-      dep.startsWith('strapi-plugin') &&
+    (dep) =>
+      dep.startsWith('@akemona-org/strapi-plugin') &&
       fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
   );
-  const pluginsToWatch = appPlugins.map(plugin =>
-    path.join(extensionsPath, plugin.replace(/^strapi-plugin-/i, ''), 'admin')
+  const pluginsToWatch = appPlugins.map((plugin) =>
+    path.join(
+      extensionsPath,
+      plugin.startsWith('@akemona-org')
+        ? plugin.replace(/^@akemona-org\/strapi-plugin-/i, '')
+        : plugin.replace(/^strapi-plugin-/i, ''),
+      'admin'
+    )
   );
   const filesToWatch = [admin, ...pluginsToWatch];
 
@@ -302,7 +315,9 @@ async function watchFiles(dir, ignoreFiles = []) {
     const isExtension = filePath.includes(extensionsPath);
     const pluginName = isExtension ? filePath.replace(extensionsPath, '').split(path.sep)[1] : '';
 
-    const packageName = isExtension ? `strapi-plugin-${pluginName}` : 'strapi-admin';
+    const packageName = isExtension
+      ? `@akemona-org/strapi-plugin-${pluginName}`
+      : '@akemona-org/strapi-admin';
 
     const targetPath = isExtension
       ? path.normalize(filePath.split(extensionsPath)[1].replace(pluginName, ''))
@@ -342,7 +357,7 @@ async function watchFiles(dir, ignoreFiles = []) {
           // or the plugins.js file
           // since the path are different when developing inside the monorepository or inside an app
           const shouldCopyPluginsJSFile =
-            filePath.split('/admin/src').filter(p => !!p).length === 1;
+            filePath.split('/admin/src').filter((p) => !!p).length === 1;
 
           if (
             (event === 'unlinkDir' && !isExtension && shouldCopyPluginsJSFile) ||

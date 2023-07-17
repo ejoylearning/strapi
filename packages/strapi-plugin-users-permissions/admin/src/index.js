@@ -5,7 +5,7 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import React from 'react';
-import { CheckPagePermissions } from 'strapi-helper-plugin';
+import { CheckPagePermissions } from '@akemona-org/strapi-helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
@@ -18,7 +18,7 @@ import EmailTemplatesPage from './containers/EmailTemplates';
 import AdvancedSettingsPage from './containers/AdvancedSettings';
 import getTrad from './utils/getTrad';
 
-export default strapi => {
+export default (strapi) => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
   const icon = pluginPkg.strapi.icon;
   const name = pluginPkg.strapi.name;
@@ -74,7 +74,7 @@ export default strapi => {
           },
           {
             title: {
-              id: getTrad('HeaderNav.link.email-templates'),
+              id: getTrad('HeaderNav.link.emailTemplates'),
               defaultMessage: 'Email templates',
             },
             name: 'email-templates',
@@ -88,7 +88,7 @@ export default strapi => {
           },
           {
             title: {
-              id: getTrad('HeaderNav.link.advanced-settings'),
+              id: getTrad('HeaderNav.link.advancedSettings'),
               defaultMessage: 'Advanced Settings',
             },
             name: 'advanced-settings',

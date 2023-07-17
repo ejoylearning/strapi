@@ -6,15 +6,17 @@ const {
     hasDraftAndPublish,
     constants: { DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW, PUBLISHED_AT_ATTRIBUTE },
   },
-} = require('strapi-utils');
+} = require('@akemona-org/strapi-utils');
 
 const optionsMap = {
   publicationState: {
     queries: {
-      [DP_PUB_STATE_LIVE]: ({ model, alias }) => qb => {
-        const { collectionName } = model;
-        qb.whereNotNull(`${alias || collectionName}.${PUBLISHED_AT_ATTRIBUTE}`);
-      },
+      [DP_PUB_STATE_LIVE]:
+        ({ model, alias }) =>
+        (qb) => {
+          const { collectionName } = model;
+          qb.whereNotNull(`${alias || collectionName}.${PUBLISHED_AT_ATTRIBUTE}`);
+        },
       [DP_PUB_STATE_PREVIEW]: () => null,
     },
     validate({ model, query: publicationState }) {
@@ -23,12 +25,13 @@ const optionsMap = {
   },
 };
 
-const availableOptions = Object.keys(optionsMap);
-const isValidOption = option => availableOptions.includes(option);
-const validate = (option, params) => {
-  const opt = _.get(optionsMap, option, {});
+const isValidOption = (optionName) => _.has(optionsMap, optionName);
+
+const validate = (optionName, params) => {
+  const opt = _.get(optionsMap, optionName, {});
   return !_.isFunction(opt.validate) || opt.validate(params);
 };
+
 const resolveQuery = (option, params) => optionsMap[option].queries[params.query](params);
 
 /**
@@ -36,20 +39,18 @@ const resolveQuery = (option, params) => optionsMap[option].queries[params.query
  * @param options
  * @returns Array<Function>
  */
-const toQueries = options => {
-  return _.reduce(
-    options,
-    (acc, params, key) => {
-      if (isValidOption(key) && validate(key, params)) {
-        const query = resolveQuery(key, params);
-        if (_.isFunction(query)) {
-          return [...acc, query];
-        }
+const toQueries = (options) => {
+  return Object.keys(options).reduce((acc, key) => {
+    const params = options[key];
+
+    if (isValidOption(key) && validate(key, params)) {
+      const query = resolveQuery(key, params);
+      if (_.isFunction(query)) {
+        return [...acc, query];
       }
-      return acc;
-    },
-    []
-  );
+    }
+    return acc;
+  }, []);
 };
 
 /**
@@ -58,7 +59,7 @@ const toQueries = options => {
  * @param qb
  */
 const runPopulateQueries = (queries, qb) => {
-  qb.where(qb => queries.forEach(query => query(qb)));
+  qb.where((qb) => queries.forEach((query) => query(qb)));
 };
 
 /**
@@ -69,7 +70,7 @@ const runPopulateQueries = (queries, qb) => {
  */
 const bindPopulateQueries = (paths, options) => {
   const queries = toQueries(options);
-  const qbFn = qb => {
+  const qbFn = (qb) => {
     runPopulateQueries(queries, qb);
   };
 
@@ -85,10 +86,26 @@ const bindPopulateQueries = (paths, options) => {
 const extendWithPopulateQueries = (fns, options) => {
   const queries = toQueries(options);
 
-  return qb => {
-    fns.filter(_.isFunction).forEach(fn => fn(qb));
+  return (qb) => {
+    fns.filter(_.isFunction).forEach((fn) => fn(qb));
     runPopulateQueries(queries, qb);
   };
+};
+
+/**
+ * Transforms queryOptions (e.g { publicationState: 'live' })
+ * into query map
+ * {
+ *   publicationState: { query: 'live', ...context }
+ * }
+ * @param {{ [key: string]: string }} queryOptions
+ * @param {object} context
+ */
+const queryOptionsToQueryMap = (queryOptions, context) => {
+  return Object.keys(queryOptions).reduce((acc, key) => {
+    acc[key] = { query: queryOptions[key], ...context };
+    return acc;
+  }, {});
 };
 
 module.exports = {
@@ -96,4 +113,5 @@ module.exports = {
   runPopulateQueries,
   bindPopulateQueries,
   extendWithPopulateQueries,
+  queryOptionsToQueryMap,
 };

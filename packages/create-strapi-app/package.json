@@ -1,9 +1,12 @@
 {
-  "name": "create-strapi-app",
-  "version": "3.3.3",
+  "name": "@akemona-org/create-strapi-app",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "3.12.4",
   "description": "Generate a new Strapi application.",
   "license": "SEE LICENSE IN LICENSE",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.akemona.com",
   "keywords": [
     "create-strapi-app",
     "create",
@@ -15,32 +18,32 @@
   "bin": {
     "create-strapi-app": "./index.js"
   },
-  "files": [
-    "create-strapi-app.js",
-    "index.js"
-  ],
   "dependencies": {
+    "@akemona-org/strapi-generate-new": "3.12.4",
+    "chalk": "4.1.1",
     "commander": "6.1.0",
-    "strapi-generate-new": "3.3.3"
+    "inquirer": "8.1.0",
+    "js-yaml": "4.1.0",
+    "node-fetch": "^2.6.1"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "strapi@akemona.com",
+    "name": "Akemona team",
+    "url": "https://strapi.akemona.com"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/akemona/strapi.git"
   },
   "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+    "url": "https://github.com/akemona/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "gitHead": "57095241bb8bc011c97ecbc8c7274b674b01cd0f"
 }

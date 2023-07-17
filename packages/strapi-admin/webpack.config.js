@@ -1,4 +1,11 @@
+'use strict';
+
 const path = require('path');
+const crypto = require('crypto');
+// * patch for md4 ssl error (ERR_OSSL_EVP_UNSUPPORTED) in Node 18 (https://github.com/webpack/webpack/issues/13572#issuecomment-923736472)
+const crypto_orig_createHash = crypto.createHash;
+crypto.createHash = (algorithm) =>
+  crypto_orig_createHash(algorithm == 'md4' ? 'sha256' : algorithm);
 const webpack = require('webpack');
 
 // Webpack plugins
@@ -9,7 +16,7 @@ const DuplicatePckgChecker = require('duplicate-package-checker-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
 const isWsl = require('is-wsl');
-const alias = require('./webpack.alias.js');
+const alias = require('./webpack.alias');
 
 // TODO: parametrize
 const URLs = {
@@ -25,6 +32,7 @@ module.exports = ({
   options = {
     backend: 'http://localhost:1337',
     publicPath: '/admin/',
+    features: [],
   },
 }) => {
   const isProduction = env === 'production';
@@ -56,6 +64,7 @@ module.exports = ({
     devtool: isProduction ? false : 'cheap-module-source-map',
     entry,
     output: {
+      hashFunction: 'sha256',
       path: dest,
       publicPath: options.publicPath,
       // Utilize long-term caching by adding content hashes (not compilation hashes)
@@ -186,22 +195,22 @@ module.exports = ({
         MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
         PUBLIC_PATH: JSON.stringify(options.publicPath),
         PROJECT_TYPE: JSON.stringify(useEE ? 'Enterprise' : 'Community'),
+        ENABLED_EE_FEATURES: JSON.stringify(/* options.features */ []),
       }),
-      new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
-        // We might need to improve this if we want to make it work with components
-        const containerPathName = resource.context.split(`${path.sep}containers${path.sep}`);
-        const componentPathName = resource.context.split(`${path.sep}components${path.sep}`);
-        const wantedPath =
-          containerPathName.length === 1 ? componentPathName[0] : containerPathName[0];
+      new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function (resource) {
+        let wantedPath = path.join(
+          resource.context.substr(0, resource.context.lastIndexOf(`${path.sep}src${path.sep}`)),
+          'src'
+        );
 
-        if (useEE) {
+        /*   if (useEE) {
           resource.request = resource.request.replace(
             /ee_else_ce/,
             path.join(wantedPath, '../..', 'ee/admin')
           );
-        } else {
-          resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath));
-        }
+        } else { */
+        resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath));
+        /* } */
       }),
       ...webpackPlugins,
     ],

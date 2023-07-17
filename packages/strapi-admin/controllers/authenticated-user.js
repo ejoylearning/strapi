@@ -1,10 +1,11 @@
 'use strict';
 
 const { validateProfileUpdateInput } = require('../validation/user');
+const { getService } = require('../utils');
 
 module.exports = {
   async getMe(ctx) {
-    const userInfo = strapi.admin.services.user.sanitizeUser(ctx.state.user);
+    const userInfo = getService('user').sanitizeUser(ctx.state.user);
 
     ctx.body = {
       data: userInfo,
@@ -20,17 +21,33 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const updatedUser = await strapi.admin.services.user.updateById(ctx.state.user.id, input);
+    const { currentPassword, ...userInfo } = input;
+
+    const authService = getService('auth');
+    const userService = getService('user');
+
+    if (currentPassword && userInfo.password) {
+      const isValid = await authService.validatePassword(currentPassword, ctx.state.user.password);
+
+      if (!isValid) {
+        return ctx.badRequest('ValidationError', {
+          currentPassword: ['Invalid credentials'],
+        });
+      }
+    }
+
+    const updatedUser = await userService.updateById(ctx.state.user.id, userInfo);
 
     ctx.body = {
-      data: strapi.admin.services.user.sanitizeUser(updatedUser),
+      data: userService.sanitizeUser(updatedUser),
     };
   },
 
   async getOwnPermissions(ctx) {
-    const { findUserPermissions, sanitizePermission } = strapi.admin.services.permission;
+    const { findUserPermissions, sanitizePermission } = getService('permission');
+    const { user } = ctx.state;
 
-    const userPermissions = await findUserPermissions(ctx.state.user);
+    const userPermissions = await findUserPermissions(user);
 
     ctx.body = {
       data: userPermissions.map(sanitizePermission),

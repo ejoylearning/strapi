@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const Mongoose = require('mongoose');
-const { parseType } = require('strapi-utils');
+const { parseType } = require('@akemona-org/strapi-utils');
 
 /**
  * Module dependencies
@@ -17,11 +17,23 @@ module.exports = (mongoose = Mongoose) => {
    *
    * Refer to: https://github.com/graphql/graphql-js/commit/3521e1429eec7eabeee4da65c93306b51308727b#diff-87c5e74dd1f7d923143e0eee611f598eR183
    */
-  mongoose.Types.ObjectId.prototype.valueOf = function() {
+  mongoose.Types.ObjectId.prototype.valueOf = function () {
+    return this.toString();
+  };
+
+  /**
+   * Covert to string as it can be greater than js max safe int (type: Int64)
+   *
+   */
+  mongoose.Types.Long.prototype.valueOf = function () {
     return this.toString();
   };
 
   const convertType = (name, attr) => {
+    if (_.has(attr, 'columnType')) {
+      return { type: attr.columnType };
+    }
+
     switch (attr.type.toLowerCase()) {
       case 'array':
         return { type: Array };
@@ -32,17 +44,17 @@ module.exports = (mongoose = Mongoose) => {
       case 'time':
         return {
           type: String,
-          validate: value =>
+          validate: (value) =>
             (!attr.required && _.isNil(value)) || parseType({ type: 'time', value }),
-          set: value =>
+          set: (value) =>
             !attr.required && _.isNil(value) ? value : parseType({ type: 'time', value }),
         };
       case 'date':
         return {
           type: String,
-          validate: value =>
+          validate: (value) =>
             (!attr.required && _.isNil(value)) || parseType({ type: 'date', value }),
-          set: value =>
+          set: (value) =>
             !attr.required && _.isNil(value) ? value : parseType({ type: 'date', value }),
         };
       case 'datetime':
@@ -91,7 +103,7 @@ module.exports = (mongoose = Mongoose) => {
     }
   };
 
-  const isMongoId = value => {
+  const isMongoId = (value) => {
     if (value instanceof mongoose.Types.ObjectId) {
       return true;
     }
@@ -106,11 +118,11 @@ module.exports = (mongoose = Mongoose) => {
     return hexadecimal.test(value) && value.length === 24;
   };
 
-  const valueToId = value => {
+  const valueToId = (value) => {
     if (Array.isArray(value)) return value.map(valueToId);
 
     if (isMongoId(value)) {
-      return mongoose.Types.ObjectId(value);
+      return new mongoose.Types.ObjectId(value);
     }
 
     return value;

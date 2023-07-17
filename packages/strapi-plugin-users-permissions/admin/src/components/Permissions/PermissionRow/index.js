@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { sortBy } from 'lodash';
-import { PermissionsWrapper, RowContainer } from 'strapi-helper-plugin';
+import { PermissionsWrapper, RowContainer } from '@akemona-org/strapi-helper-plugin';
 
 import getTrad from '../../../utils/getTrad';
 import SubCategory from './SubCategory';
@@ -72,7 +72,7 @@ const PermissionRow = ({ isOpen, isWhite, name, onOpenPlugin, permissions }) => 
       </RowStyle>
       {isOpen && (
         <PermissionsWrapper isWhite={isWhite}>
-          {subCategories.map(subCategory => (
+          {subCategories.map((subCategory) => (
             <SubCategory key={subCategory.name} subCategory={subCategory} />
           ))}
         </PermissionsWrapper>

@@ -1,8 +1,10 @@
-const getExistingActions = permissions => {
+import { get } from 'lodash';
+
+const getExistingActions = (permissions) => {
   return Array.from(
     new Set(
       Object.entries(permissions).reduce((acc, current) => {
-        const getActionsPermission = permission =>
+        const getActionsPermission = (permission) =>
           permission.reduce((accAction, currentAction) => {
             let actionsToReturn = accAction;
 
@@ -21,7 +23,7 @@ const getExistingActions = permissions => {
           ...acc,
           ...getActionsPermission([
             ...Object.values(current[1].attributes || {}),
-            current[1].contentTypeActions,
+            get(current[1], 'contentTypeActions', {}),
           ]),
         ];
       }, [])

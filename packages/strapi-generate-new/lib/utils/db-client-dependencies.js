@@ -1,9 +1,9 @@
 'use strict';
 
 const sqlClientModule = {
-  sqlite: 'sqlite3',
-  postgres: 'pg',
-  mysql: 'mysql',
+  sqlite: { sqlite3: '5.1.4' },
+  postgres: { pg: '8.9.0' },
+  mysql: { mysql: '2.18.1' },
 };
 
 /**
@@ -15,13 +15,13 @@ module.exports = ({ scope, client }) => {
     case 'postgres':
     case 'mysql':
       return {
-        'strapi-connector-bookshelf': scope.strapiVersion,
-        knex: '<0.20.0',
-        [sqlClientModule[client]]: 'latest',
+        '@akemona-org/strapi-connector-bookshelf': scope.strapiVersion,
+        knex: '2.4.0',
+        ...sqlClientModule[client],
       };
     case 'mongo':
       return {
-        'strapi-connector-mongoose': scope.strapiVersion,
+        '@akemona-org/strapi-connector-mongoose': scope.strapiVersion,
       };
     default:
       throw new Error(`Invalid client "${client}"`);

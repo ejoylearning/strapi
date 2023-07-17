@@ -219,7 +219,7 @@ function ListRow({
             />
             &nbsp;
             <FormattedMessage id={`${pluginId}.from`}>
-              {msg => (
+              {(msg) => (
                 <span style={{ fontStyle: 'italic' }}>
                   <UpperFist content={contentTypeFriendlyName} />
                   &nbsp;
@@ -230,7 +230,7 @@ function ListRow({
           </div>
         ) : (
           <>
-            <FormattedMessage id={`${pluginId}.attribute.${readableType}`} />
+            <FormattedMessage id={`${pluginId}.attribute.${readableType}`} defaultMessage={type} />
             &nbsp;
             {repeatable && <FormattedMessage id={getTrad('component.repeatable')} />}
           </>
@@ -250,7 +250,7 @@ function ListRow({
                       },
                       {
                         icon: <FontAwesomeIcon icon="trash-alt" />,
-                        onClick: e => {
+                        onClick: (e) => {
                           e.stopPropagation();
                           removeAttribute(
                             editTarget,
@@ -266,7 +266,7 @@ function ListRow({
                     links={[
                       {
                         icon: <FontAwesomeIcon icon="trash-alt" />,
-                        onClick: e => {
+                        onClick: (e) => {
                           e.stopPropagation();
                           removeAttribute(
                             editTarget,

@@ -9,7 +9,7 @@ import {
   SizedInput,
   useUserPermissions,
   request,
-} from 'strapi-helper-plugin';
+} from '@akemona-org/strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, getRequestURL } from '../../utils';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';
@@ -19,7 +19,14 @@ import reducer, { initialState } from './reducer';
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
   const [showModalWarning, setShowModalWarning] = useState(false);
-  const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.advancedSettings') });
+  const pageTitle = formatMessage({
+    id: getTrad('HeaderNav.link.advancedSettings'),
+    defaultMessage: 'Advanced Settings',
+  });
+  const formTitle = formatMessage({
+    id: getTrad('Settings.advancedSettings.title'),
+    defaultMessage: 'Settings',
+  });
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateAdvancedSettings };
   }, []);
@@ -27,10 +34,8 @@ const AdvancedSettingsPage = () => {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
   } = useUserPermissions(updatePermissions);
-  const [
-    { initialData, isConfirmButtonLoading, isLoading, modifiedData, roles },
-    dispatch,
-  ] = useReducer(reducer, initialState);
+  const [{ initialData, isConfirmButtonLoading, isLoading, modifiedData, roles }, dispatch] =
+    useReducer(reducer, initialState);
   const isMounted = useRef(true);
   const abortController = new AbortController();
   const { signal } = abortController;
@@ -83,7 +88,7 @@ const AdvancedSettingsPage = () => {
   }, []);
 
   const handleSubmit = useCallback(
-    async e => {
+    async (e) => {
       e.preventDefault();
 
       try {
@@ -127,7 +132,7 @@ const AdvancedSettingsPage = () => {
   }, []);
 
   const handleToggleModal = useCallback(() => {
-    setShowModalWarning(prev => !prev);
+    setShowModalWarning((prev) => !prev);
   }, []);
 
   const headerActions = useMemo(() => {
@@ -176,8 +181,8 @@ const AdvancedSettingsPage = () => {
         <form onSubmit={handleSubmit}>
           <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
           <ListBaselineAlignment />
-          <FormBloc title="Settings" isLoading={showLoader}>
-            {form.map(input => {
+          <FormBloc title={formTitle} isLoading={showLoader}>
+            {form.map((input) => {
               return (
                 <SizedInput
                   key={input.name}

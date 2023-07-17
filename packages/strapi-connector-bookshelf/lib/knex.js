@@ -32,7 +32,7 @@ const defaultConfig = {
  * Knex hook
  */
 
-module.exports = strapi => {
+module.exports = (strapi) => {
   // For each connection in the config register a new Knex connection.
   _.forEach(
     _.pickBy(strapi.config.connections, {
@@ -101,6 +101,10 @@ module.exports = strapi => {
           },
           ...connection.options,
           debug: _.get(connection.options, 'debug', false),
+          pool: {
+            ..._.get(connection.options, 'pool', {}),
+            min: _.get(connection.options, 'pool.min', 0),
+          },
         },
         strapi.config.hook.settings.knex,
         defaultConfig
@@ -135,7 +139,7 @@ module.exports = strapi => {
             options.pool = {
               ...options.pool,
               afterCreate: (conn, cb) => {
-                conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, err => {
+                conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
                   cb(err, conn);
                 });
               },

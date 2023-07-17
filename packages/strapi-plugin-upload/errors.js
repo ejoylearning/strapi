@@ -1,16 +1,18 @@
+'use strict';
+
 const errorTypes = {
   ENTITY_TOO_LARGE: 'entityTooLarge',
   UNKNOWN_ERROR: 'unknownError',
 };
 
-const entityTooLarge = message => {
+const entityTooLarge = (message) => {
   const error = new Error(message || 'Entity too large');
   error.type = errorTypes.ENTITY_TOO_LARGE;
   return error;
 };
 entityTooLarge.type = errorTypes.ENTITY_TOO_LARGE;
 
-const unknownError = message => {
+const unknownError = (message) => {
   const error = new Error(message || 'Unknown error');
   error.type = errorTypes.UNKNOWN_ERROR;
   return error;
@@ -21,7 +23,7 @@ const is = (err, errorFactory) => {
   return err.type && err.type === errorFactory.type;
 };
 
-const convertToStrapiError = err => {
+const convertToStrapiError = (err) => {
   if (is(err, entityTooLarge)) {
     return strapi.errors.entityTooLarge('FileTooBig', {
       errors: [

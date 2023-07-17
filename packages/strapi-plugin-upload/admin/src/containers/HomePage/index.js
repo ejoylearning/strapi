@@ -2,7 +2,7 @@ import React, { useCallback, useReducer, useRef, useState, useEffect } from 'rea
 import { get, includes, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
-import { Button } from '@buffetjs/core';
+import { Button, Padded } from '@buffetjs/core';
 import {
   PopUpWarning,
   useGlobalContext,
@@ -10,11 +10,10 @@ import {
   generateSearchFromFilters,
   request,
   useQuery,
-} from 'strapi-helper-plugin';
+} from '@akemona-org/strapi-helper-plugin';
 import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
-import Padded from '../../components/Padded';
 import { useAppContext } from '../../hooks';
 import ModalStepper from '../ModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';
@@ -59,7 +58,7 @@ const HomePage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const deleteMedia = async id => {
+  const deleteMedia = async (id) => {
     const requestURL = getRequestUrl(`files/${id}`);
 
     try {
@@ -192,9 +191,9 @@ const HomePage = () => {
     push({ search: newSearch });
   };
 
-  const handleClickEditFile = id => {
+  const handleClickEditFile = (id) => {
     if (allowedActions.canUpdate) {
-      const file = formatFileForEditing(data.find(file => toString(file.id) === toString(id)));
+      const file = formatFileForEditing(data.find((file) => toString(file.id) === toString(id)));
 
       setFileToEdit(file);
       setModalInitialStep('edit');
@@ -203,15 +202,15 @@ const HomePage = () => {
   };
 
   const handleClickToggleModal = (refetch = false) => {
-    setIsModalOpen(prev => !prev);
+    setIsModalOpen((prev) => !prev);
     setShouldRefetch(refetch);
   };
 
   const handleClickTogglePopup = () => {
-    setIsPopupOpen(prev => !prev);
+    setIsPopupOpen((prev) => !prev);
   };
 
-  const handleDeleteFilter = index => {
+  const handleDeleteFilter = (index) => {
     const filters = generateFiltersFromSearch(search).filter(
       (filter, filterIndex) => filterIndex !== index
     );
@@ -227,7 +226,7 @@ const HomePage = () => {
     dispatch({ type: 'ON_DELETE_MEDIAS' });
 
     try {
-      await Promise.all(dataToDelete.map(item => deleteMedia(item.id)));
+      await Promise.all(dataToDelete.map((item) => deleteMedia(item.id)));
 
       dispatch({
         type: 'ON_DELETE_MEDIAS_SUCCEEDED',
@@ -297,7 +296,7 @@ const HomePage = () => {
         label: formatMessage({ id: 'app.utils.delete' }),
         onClick: () => setIsPopupOpen(true),
         type: 'button',
-        Component: buttonProps => {
+        Component: (buttonProps) => {
           if (!allowedActions.canUpdate) {
             return null;
           }
@@ -311,7 +310,7 @@ const HomePage = () => {
         label: formatMessage({ id: getTrad('header.actions.upload-assets') }),
         onClick: () => handleClickToggleModal(),
         type: 'button',
-        Component: buttonProps => {
+        Component: (buttonProps) => {
           if (!allowedActions.canCreate) {
             return null;
           }
@@ -322,7 +321,7 @@ const HomePage = () => {
     ],
   };
 
-  const handleRemoveFileFromDataToDelete = useCallback(id => {
+  const handleRemoveFileFromDataToDelete = useCallback((id) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
       id,

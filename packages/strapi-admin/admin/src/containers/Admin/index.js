@@ -4,7 +4,7 @@
  *
  */
 
-import React, { createRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { connect } from 'react-redux';
@@ -19,25 +19,25 @@ import {
   GlobalContextProvider,
   LoadingIndicatorPage,
   OverlayBlocker,
-  UserProvider,
   CheckPagePermissions,
   request,
-} from 'strapi-helper-plugin';
+} from '@akemona-org/strapi-helper-plugin';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS, STRAPI_UPDATE_NOTIF } from '../../config';
+import { checkLatestStrapiVersion } from '../../utils';
 
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../LeftMenu';
 import InstalledPluginsPage from '../InstalledPluginsPage';
-import LocaleToggle from '../LocaleToggle';
 import HomePage from '../HomePage';
 import MarketplacePage from '../MarketplacePage';
 import NotFoundPage from '../NotFoundPage';
 import OnboardingVideos from '../Onboarding';
-import SettingsPage from '../SettingsPage';
+import PermissionsManager from '../PermissionsManager';
 import PluginDispatcher from '../PluginDispatcher';
 import ProfilePage from '../ProfilePage';
+import SettingsPage from '../SettingsPage';
 import Logout from './Logout';
 import {
   disableGlobalOverlayBlocker,
@@ -46,13 +46,7 @@ import {
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
-import {
-  getStrapiLatestReleaseSucceeded,
-  getUserPermissions,
-  getUserPermissionsError,
-  getUserPermissionsSucceeded,
-  setAppError,
-} from './actions';
+import { getStrapiLatestReleaseSucceeded, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
 import Wrapper from './Wrapper';
 import Content from './Content';
@@ -60,8 +54,8 @@ import Content from './Content';
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
 
-  // Ref to access the menu API
-  menuRef = createRef();
+  // This state is really temporary until we create a menu API
+  state = { updateMenu: null };
 
   helpers = {
     updatePlugin: this.props.updatePlugin,
@@ -72,8 +66,8 @@ export class Admin extends React.Component {
     this.initApp();
   }
 
-  shouldComponentUpdate(prevProps) {
-    return !isEmpty(difference(prevProps, this.props));
+  shouldComponentUpdate(prevProps, prevState) {
+    return !isEmpty(difference(prevProps, this.props)) || !isEmpty(prevState, this.state);
   }
 
   /* istanbul ignore next */
@@ -90,20 +84,20 @@ export class Admin extends React.Component {
     this.props.setAppError();
   }
 
-  emitEvent = async (event, properties) => {
+  emitEvent = async (/* event, properties */) => {
     const {
       global: { uuid },
     } = this.props;
 
     if (uuid) {
       try {
-        await axios.post('https://analytics.strapi.io/track', {
+        /*  await axios.post('https://analytics.strapi.io/track', {
           event,
           // PROJECT_TYPE is an env variable defined in the webpack config
           // eslint-disable-next-line no-undef
           properties: { ...properties, projectType: PROJECT_TYPE },
           uuid,
-        });
+        }); */
       } catch (err) {
         // Silent
       }
@@ -134,9 +128,10 @@ export class Admin extends React.Component {
     try {
       const {
         data: { tag_name },
-      } = await axios.get('https://api.github.com/repos/strapi/strapi/releases/latest');
+      } = await axios.get('https://api.github.com/repos/akemona/strapi/releases/latest');
+      const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
 
-      getStrapiLatestReleaseSucceeded(tag_name);
+      getStrapiLatestReleaseSucceeded(tag_name, shouldUpdateStrapi);
 
       const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
 
@@ -144,12 +139,12 @@ export class Admin extends React.Component {
         return;
       }
 
-      if (`v${strapiVersion}` !== tag_name) {
+      if (shouldUpdateStrapi) {
         strapi.notification.toggle({
           type: 'info',
           message: { id: 'notification.version.update.message' },
           link: {
-            url: `https://github.com/strapi/strapi/releases/tag/${tag_name}`,
+            url: `https://github.com/akemona/strapi/releases/tag/${tag_name}`,
             label: {
               id: 'notification.version.update.link',
             },
@@ -163,36 +158,17 @@ export class Admin extends React.Component {
     }
   };
 
-  fetchUserPermissions = async (resetState = false) => {
-    const { getUserPermissions, getUserPermissionsError, getUserPermissionsSucceeded } = this.props;
-
-    if (resetState) {
-      // Show a loader
-      getUserPermissions();
-    }
-
-    try {
-      const { data } = await request('/admin/users/me/permissions', { method: 'GET' });
-
-      getUserPermissionsSucceeded(data);
-    } catch (err) {
-      console.error(err);
-      getUserPermissionsError(err);
-    }
-  };
-
-  hasApluginNotReady = props => {
+  hasApluginNotReady = (props) => {
     const {
       global: { plugins },
     } = props;
 
-    return !Object.keys(plugins).every(plugin => plugins[plugin].isReady === true);
+    return !Object.keys(plugins).every((plugin) => plugins[plugin].isReady === true);
   };
 
   initApp = async () => {
     await this.fetchAppInfo();
     await this.fetchStrapiLatestRelease();
-    await this.fetchUserPermissions(true);
   };
 
   /**
@@ -221,7 +197,7 @@ export class Admin extends React.Component {
     }, []);
   };
 
-  renderPluginDispatcher = props => {
+  renderPluginDispatcher = (props) => {
     // NOTE: Send the needed props instead of everything...
 
     return <PluginDispatcher {...this.props} {...props} {...this.helpers} />;
@@ -229,9 +205,13 @@ export class Admin extends React.Component {
 
   renderRoute = (props, Component) => <Component {...this.props} {...props} />;
 
+  setUpdateMenu = (updateMenuFn) => {
+    this.setState({ updateMenu: updateMenuFn });
+  };
+
   render() {
     const {
-      admin: { isLoading, latestStrapiReleaseTag, userPermissions },
+      admin: { shouldUpdateStrapi },
       global: {
         autoReload,
         blockApp,
@@ -257,46 +237,39 @@ export class Admin extends React.Component {
       );
     }
 
-    // Show a loader while permissions are being fetched
-    if (isLoading) {
-      return <LoadingIndicatorPage />;
-    }
-
     return (
-      <GlobalContextProvider
-        autoReload={autoReload}
-        emitEvent={this.emitEvent}
-        currentEnvironment={currentEnvironment}
-        currentLocale={locale}
-        disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
-        enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
-        fetchUserPermissions={this.fetchUserPermissions}
-        formatMessage={formatMessage}
-        latestStrapiReleaseTag={latestStrapiReleaseTag}
-        menu={this.menuRef.current}
-        plugins={plugins}
-        settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
-        strapiVersion={strapiVersion}
-        updatePlugin={updatePlugin}
-      >
-        <UserProvider value={userPermissions}>
+      <PermissionsManager>
+        <GlobalContextProvider
+          autoReload={autoReload}
+          emitEvent={this.emitEvent}
+          currentEnvironment={currentEnvironment}
+          currentLocale={locale}
+          disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
+          enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
+          formatMessage={formatMessage}
+          shouldUpdateStrapi={shouldUpdateStrapi}
+          plugins={plugins}
+          settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
+          strapiVersion={strapiVersion}
+          updatePlugin={updatePlugin}
+          updateMenu={this.state.updateMenu}
+        >
           <Wrapper>
             <LeftMenu
-              latestStrapiReleaseTag={latestStrapiReleaseTag}
+              shouldUpdateStrapi={shouldUpdateStrapi}
               version={strapiVersion}
               plugins={plugins}
-              ref={this.menuRef}
+              setUpdateMenu={this.setUpdateMenu}
             />
             <NavTopRightWrapper>
               {/* Injection zone not ready yet */}
               <Logout />
-              <LocaleToggle isLogged />
             </NavTopRightWrapper>
             <div className="adminPageRightWrapper">
               <Header />
               <Content>
                 <Switch>
-                  <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
+                  <Route path="/" render={(props) => this.renderRoute(props, HomePage)} exact />
                   <Route path="/me" component={ProfilePage} />
                   <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
                   <Route path="/list-plugins" exact>
@@ -326,8 +299,8 @@ export class Admin extends React.Component {
             />
             {SHOW_TUTORIALS && <OnboardingVideos />}
           </Wrapper>
-        </UserProvider>
-      </GlobalContextProvider>
+        </GlobalContextProvider>
+      </PermissionsManager>
     );
   }
 }
@@ -342,17 +315,12 @@ Admin.defaultProps = {
 Admin.propTypes = {
   admin: PropTypes.shape({
     appError: PropTypes.bool,
-    isLoading: PropTypes.bool,
-    latestStrapiReleaseTag: PropTypes.string.isRequired,
-    userPermissions: PropTypes.array,
+    shouldUpdateStrapi: PropTypes.bool.isRequired,
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getInfosDataSucceeded: PropTypes.func.isRequired,
   getStrapiLatestReleaseSucceeded: PropTypes.func.isRequired,
-  getUserPermissions: PropTypes.func.isRequired,
-  getUserPermissionsError: PropTypes.func.isRequired,
-  getUserPermissionsSucceeded: PropTypes.func.isRequired,
   global: PropTypes.shape({
     autoReload: PropTypes.bool,
     blockApp: PropTypes.bool,
@@ -384,9 +352,6 @@ export function mapDispatchToProps(dispatch) {
       enableGlobalOverlayBlocker,
       getInfosDataSucceeded,
       getStrapiLatestReleaseSucceeded,
-      getUserPermissions,
-      getUserPermissionsError,
-      getUserPermissionsSucceeded,
       setAppError,
       updatePlugin,
     },

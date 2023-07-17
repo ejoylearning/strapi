@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from '@akemona-org/strapi-helper-plugin';
 
 const Label = styled.label`
   position: relative;
@@ -22,11 +22,16 @@ const Label = styled.label`
     right: 0;
   }
 
-  ${({ isDragging }) =>
-  isDragging &&
+  ${({ isDragging, theme }) =>
+    isDragging &&
     `
-      background-color: rgba(28, 93, 231, 0.01);
-      border: 2px dashed rgba(28, 93, 231, 0.1);
+      background-color: ${theme.main.colors.lightestBlue};
+      border: 2px dashed ${theme.main.colors.darkBlue};
+      >svg {
+        >g {
+          fill: ${theme.main.colors.darkBlue};
+        }
+      }
     `}
 `;
 

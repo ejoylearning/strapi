@@ -7,7 +7,7 @@
 // Public node modules.
 const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
-const { errors } = require('strapi-plugin-upload');
+const { errors } = require('@akemona-org/strapi-plugin-upload');
 
 module.exports = {
   init(config) {
@@ -16,8 +16,17 @@ module.exports = {
     return {
       upload(file, customConfig = {}) {
         return new Promise((resolve, reject) => {
+          const config = {
+            resource_type: 'auto',
+            public_id: file.hash,
+          };
+
+          if (file.ext) {
+            config.filename = `${file.hash}${file.ext}`;
+          }
+
           const upload_stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto', public_id: file.hash, ...customConfig },
+            { ...config, ...customConfig },
             (err, image) => {
               if (err) {
                 if (err.message.includes('File size too large')) {

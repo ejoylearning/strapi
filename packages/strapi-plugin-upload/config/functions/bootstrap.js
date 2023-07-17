@@ -25,30 +25,38 @@ module.exports = async () => {
   }
 
   await pruneObsoleteRelations();
-  registerPermissionActions();
+  await registerPermissionActions();
 };
 
-const wrapFunctionForErrors = fn => async (...args) => {
-  try {
-    return await fn(...args);
-  } catch (err) {
-    throw convertToStrapiError(err);
-  }
-};
+const wrapFunctionForErrors =
+  (fn) =>
+  async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (err) {
+      throw convertToStrapiError(err);
+    }
+  };
 
-const createProvider = ({ provider, providerOptions }) => {
+const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
   try {
-    const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
+    const providerInstance = require(`@akemona-org/strapi-provider-upload-${provider}`).init(
+      providerOptions
+    );
 
     return Object.assign(Object.create(baseProvider), {
       ...providerInstance,
-      upload: wrapFunctionForErrors(providerInstance.upload.bind(providerInstance)),
-      delete: wrapFunctionForErrors(providerInstance.delete.bind(providerInstance)),
+      upload: wrapFunctionForErrors((file, options = actionOptions.upload) => {
+        return providerInstance.upload(file, options);
+      }),
+      delete: wrapFunctionForErrors((file, options = actionOptions.delete) => {
+        return providerInstance.delete(file, options);
+      }),
     });
   } catch (err) {
     strapi.log.error(err);
     throw new Error(
-      `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${provider}\``
+      `The provider package isn't installed. Please run \`npm install @akemona-org/strapi-provider-upload-${provider}\``
     );
   }
 };
@@ -82,7 +90,7 @@ const pruneObsoleteRelationsQuery = ({ model }) => {
   }
 
   const models = Array.from(strapi.db.models.values());
-  const modelsId = models.map(model => model.globalId);
+  const modelsId = models.map((model) => model.globalId);
 
   return model.updateMany(
     { related: { $elemMatch: { kind: { $nin: modelsId } } } },
@@ -90,7 +98,7 @@ const pruneObsoleteRelationsQuery = ({ model }) => {
   );
 };
 
-const registerPermissionActions = () => {
+const registerPermissionActions = async () => {
   const actions = [
     {
       section: 'plugins',
@@ -135,6 +143,5 @@ const registerPermissionActions = () => {
     },
   ];
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };

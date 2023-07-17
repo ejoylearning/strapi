@@ -104,8 +104,8 @@ describe('<App /> reducer', () => {
         autoReload: true,
         communityEdition: false,
         currentEnvironment: 'test',
-        nodeVersion: 'v12.14.1',
-        strapiVersion: '3.2.1',
+        nodeVersion: 'v18.12.1',
+        strapiVersion: '3.10.2',
       };
       const expected = state
         .set('appInfos', data)
@@ -118,10 +118,7 @@ describe('<App /> reducer', () => {
 
   describe('GET_DATA_SUCCEEDED', () => {
     it('should handle the set the data correctly', () => {
-      const expected = state
-        .set('hasAdminUser', true)
-        .set('uuid', 'true')
-        .set('isLoading', false);
+      const expected = state.set('hasAdminUser', true).set('uuid', 'true').set('isLoading', false);
 
       expect(appReducer(state, getDataSucceeded({ hasAdmin: true, uuid: 'true' }))).toEqual(
         expected

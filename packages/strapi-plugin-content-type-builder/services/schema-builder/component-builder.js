@@ -4,8 +4,8 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
+const { nameToSlug, nameToCollectionName } = require('@akemona-org/strapi-utils');
 const { isConfigurable } = require('../../utils/attributes');
-const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
@@ -52,13 +52,14 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
-      if (this.components.size === 0) {
+      /*  if (this.components.size === 0) {
         strapi.telemetry.send('didCreateFirstComponent');
       } else {
         strapi.telemetry.send('didCreateComponent');
-      }
+      } */
 
       this.components.set(uid, handler);
 
@@ -101,14 +102,15 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {
-        this.components.forEach(compo => {
+        this.components.forEach((compo) => {
           compo.updateComponent(uid, newUID);
         });
 
-        this.contentTypes.forEach(ct => {
+        this.contentTypes.forEach((ct) => {
           ct.updateComponent(uid, newUID);
         });
       }
@@ -121,11 +123,11 @@ module.exports = function createComponentBuilder() {
         throw new Error('component.notFound');
       }
 
-      this.components.forEach(compo => {
+      this.components.forEach((compo) => {
         compo.removeComponent(uid);
       });
 
-      this.contentTypes.forEach(ct => {
+      this.contentTypes.forEach((ct) => {
         ct.removeComponent(uid);
       });
 

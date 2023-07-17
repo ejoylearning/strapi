@@ -6,7 +6,6 @@ import {
   onChangeBulkSelectall,
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
-  resetProps,
   setModalLoadingState,
   toggleModalDelete,
   toggleModalDeleteAll,
@@ -19,7 +18,6 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
 
   beforeEach(() => {
     state = {
-      count: 0,
       data: [],
       didDeleteData: false,
       entriesToDelete: [],
@@ -27,43 +25,54 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       showModalConfirmButtonLoading: false,
       showWarningDelete: false,
       showWarningDeleteAll: false,
+      contentType: {},
+      initialDisplayedHeaders: [],
+      displayedHeaders: [],
+      pagination: {
+        total: 0,
+      },
     };
   });
 
-  describe('DEFAULT_ACTION', () => {
-    it('should return the initialState', () => {
-      const expected = state;
+  it('should handle the default action correctly', () => {
+    const expected = state;
+    state = {};
 
-      expect(reducer(undefined, {})).toEqual(expected);
-    });
+    expect(reducer(undefined, {})).toEqual(expected);
   });
 
   describe('GET_DATA', () => {
-    it('should return the initialState', () => {
-      state.count = 1;
-      state.data = ['test'];
+    it('should return getData action correctly', () => {
+      state.contentType = 'test';
+      state.initialDisplayedHeaders = ['test'];
+      state.displayedHeaders = ['test'];
       state.isLoading = false;
 
-      const expected = produce(state, draft => {
-        draft.count = 0;
+      const expected = produce(state, (draft) => {
         draft.data = [];
+        draft.didDeleteData = false;
+        draft.entriesToDelete = [];
         draft.isLoading = true;
+        draft.showModalConfirmButtonLoading = false;
+        draft.showWarningDelete = false;
+        draft.showWarningDeleteAll = false;
+        draft.contentType = 'test';
+        draft.initialDisplayedHeaders = ['test'];
+        draft.displayedHeaders = ['test'];
       });
 
       expect(reducer(state, getData())).toEqual(expected);
     });
   });
 
-  describe('GET_DATA_SUCCEEDED', () => {
-    it('should set the data correctly', () => {
-      const expected = produce(state, draft => {
-        draft.count = 1;
-        draft.data = ['test'];
-        draft.isLoading = false;
-      });
-
-      expect(reducer(state, getDataSucceeded(1, ['test']))).toEqual(expected);
+  it('should handle the getDataSucceeded action correctly', () => {
+    const expected = produce(state, (draft) => {
+      draft.pagination = { count: 1 };
+      draft.data = ['test'];
+      draft.isLoading = false;
     });
+
+    expect(reducer(state, getDataSucceeded({ count: 1 }, ['test']))).toEqual(expected);
   });
 
   describe('ON_CHANGE_BULK', () => {
@@ -73,7 +82,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       };
       state.entriesToDelete = ['1'];
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.entriesToDelete = ['1', '13'];
       });
 
@@ -86,7 +95,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       };
       state.entriesToDelete = ['1', '13', '14'];
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.entriesToDelete = ['1', '14'];
       });
 
@@ -98,7 +107,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
     it('should remove all the selected elements if the entriesToDelete array is not empty', () => {
       state.entriesToDelete = ['1', '13', '14'];
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.entriesToDelete = [];
       });
 
@@ -107,19 +116,9 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
 
     it('should all all the elements if the entriesToDelete array is empty', () => {
       state.entriesToDelete = [];
-      state.data = [
-        {
-          id: 1,
-        },
-        {
-          id: '2',
-        },
-        {
-          id: '3',
-        },
-      ];
+      state.data = [{ id: 1 }, { id: '2' }, { id: '3' }];
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.entriesToDelete = ['1', '2', '3'];
       });
 
@@ -131,7 +130,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
     it('should toggle the modal and set the didDeleteData to true', () => {
       state.showWarningDelete = true;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.showWarningDelete = false;
         draft.didDeleteData = true;
       });
@@ -144,7 +143,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
     it('should toggle the modal and set the didDeleteData to true', () => {
       state.showWarningDeleteAll = true;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.showWarningDeleteAll = false;
         draft.didDeleteData = true;
       });
@@ -153,27 +152,11 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
     });
   });
 
-  describe('RESET_PROPS', () => {
-    it('should return the initialState', () => {
-      state.count = 1;
-      state.data = ['test'];
-      state.isLoading = false;
-
-      const expected = produce(state, draft => {
-        draft.count = 0;
-        draft.data = [];
-        draft.isLoading = true;
-      });
-
-      expect(reducer(state, resetProps())).toEqual(expected);
-    });
-  });
-
   describe('SET_MODAL_LOADING_STATE', () => {
     it('should set the showModalConfirmButtonLoading to true', () => {
       state.showModalConfirmButtonLoading = false;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.showModalConfirmButtonLoading = true;
       });
 
@@ -185,7 +168,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
     it('should set the showModalConfirmButtonLoading to false', () => {
       state.showModalConfirmButtonLoading = true;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.showModalConfirmButtonLoading = false;
         draft.showWarningDelete = true;
       });
@@ -197,7 +180,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       state.showWarningDelete = false;
       state.didDeleteData = true;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.didDeleteData = false;
         draft.showWarningDelete = true;
       });
@@ -209,7 +192,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       state.showWarningDelete = true;
       state.didDeleteData = true;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.didDeleteData = true;
         draft.showWarningDelete = false;
       });
@@ -221,7 +204,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       state.showWarningDelete = false;
       state.entriesToDelete = ['1'];
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.showWarningDelete = true;
         draft.entriesToDelete = [];
       });
@@ -234,7 +217,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
     it('should set the showModalConfirmButtonLoading to false', () => {
       state.showModalConfirmButtonLoading = true;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.showModalConfirmButtonLoading = false;
         draft.showWarningDeleteAll = true;
       });
@@ -246,7 +229,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       state.showWarningDeleteAll = false;
       state.didDeleteData = true;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.didDeleteData = false;
         draft.showWarningDeleteAll = true;
       });
@@ -258,7 +241,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       state.showWarningDeleteAll = true;
       state.didDeleteData = true;
 
-      const expected = produce(state, draft => {
+      const expected = produce(state, (draft) => {
         draft.didDeleteData = true;
         draft.showWarningDeleteAll = false;
       });

@@ -4,7 +4,7 @@ import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
+import { request, useGlobalContext } from '@akemona-org/strapi-helper-plugin';
 
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
@@ -36,7 +36,7 @@ const EditPage = () => {
     return [
       {
         label: formatMessage({
-          id: getTrad('app.components.Button.reset'),
+          id: 'app.components.Button.reset',
           defaultMessage: 'Reset',
         }),
         onClick: () => {
@@ -48,7 +48,7 @@ const EditPage = () => {
       },
       {
         label: formatMessage({
-          id: getTrad('app.components.Button.save'),
+          id: 'app.components.Button.save',
           defaultMessage: 'Save',
         }),
         onClick: handleSubmit,
@@ -59,7 +59,7 @@ const EditPage = () => {
     ];
   };
 
-  const handleCreateRoleSubmit = data => {
+  const handleCreateRoleSubmit = (data) => {
     strapi.lockAppWithOverlay();
     setIsSubmiting(true);
 
@@ -79,7 +79,7 @@ const EditPage = () => {
           message: { id: getTrad('Settings.roles.edited') },
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         strapi.notification.toggle({
           type: 'warning',

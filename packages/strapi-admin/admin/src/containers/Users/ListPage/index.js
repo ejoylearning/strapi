@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
+  BaselineAlignment,
   useQuery,
   request,
   useUserPermissions,
   LoadingIndicatorPage,
   PopUpWarning,
-} from 'strapi-helper-plugin';
+} from '@akemona-org/strapi-helper-plugin';
 import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Flex, Padded } from '@buffetjs/core';
-import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { useSettingsHeaderSearchContext } from '../../../hooks';
 import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../components/Users';
@@ -104,7 +104,7 @@ const ListPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead]);
 
-  const handleChangeDataToDelete = ids => {
+  const handleChangeDataToDelete = (ids) => {
     dispatch({
       type: 'ON_CHANGE_DATA_TO_DELETE',
       dataToDelete: ids,
@@ -139,7 +139,7 @@ const ListPage = () => {
     push({ search: currentSearch.toString() });
   };
 
-  const handleClickDelete = useCallback(id => {
+  const handleClickDelete = useCallback((id) => {
     handleToggleModal();
 
     dispatch({
@@ -201,9 +201,9 @@ const ListPage = () => {
     handleToggleModal();
   }, [dataToDelete]);
 
-  const handleToggle = () => setIsModalOpened(prev => !prev);
+  const handleToggle = () => setIsModalOpened((prev) => !prev);
 
-  const handleToggleModal = () => setIsWarningDeleteAllOpened(prev => !prev);
+  const handleToggleModal = () => setIsWarningDeleteAllOpened((prev) => !prev);
 
   const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
     const currentSearch = new URLSearchParams(search);
@@ -238,21 +238,21 @@ const ListPage = () => {
       />
       {canRead && (
         <>
-          <BaselineAlignement top size="1px">
+          <BaselineAlignment top size="1px">
             <Flex flexWrap="wrap">
               <SortPicker onChange={handleChangeSort} value={_sort} />
               <Padded right size="10px" />
-              <BaselineAlignement bottom size="6px">
+              <BaselineAlignment bottom size="6px">
                 <FilterPicker onChange={handleChangeFilter} />
-              </BaselineAlignement>
+              </BaselineAlignment>
               <Padded right size="10px" />
               {filters.map((filter, i) => (
                 // eslint-disable-next-line react/no-array-index-key
                 <Filter key={i} {...filter} onClick={handleClickDeleteFilter} />
               ))}
             </Flex>
-          </BaselineAlignement>
-          <BaselineAlignement top size="8px" />
+          </BaselineAlignment>
+          <BaselineAlignment top size="8px" />
           <Padded top size="sm">
             <List
               canDelete={canDelete}

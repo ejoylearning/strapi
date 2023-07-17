@@ -1,9 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
-const { parseMultipartData, sanitizeEntity } = require('strapi-utils');
+const { parseMultipartData, sanitizeEntity } = require('@akemona-org/strapi-utils');
 
-const createSanitizeFn = model => data => {
+const createSanitizeFn = (model) => (data) => {
   return sanitizeEntity(data, { model: strapi.getModel(model.uid) });
 };
 
@@ -43,19 +43,21 @@ const createSingleTypeController = ({ model, service }) => {
      * @return {Object}
      */
     async update(ctx) {
+      const { body, query } = ctx.request;
+
       let entity;
       if (ctx.is('multipart')) {
         const { data, files } = parseMultipartData(ctx);
-        entity = await service.createOrUpdate(data, { files });
+        entity = await service.createOrUpdate(data, { files, query });
       } else {
-        entity = await service.createOrUpdate(ctx.request.body);
+        entity = await service.createOrUpdate(body, { query });
       }
 
       return sanitize(entity);
     },
 
-    async delete() {
-      const entity = await service.delete();
+    async delete(ctx) {
+      const entity = await service.delete(ctx.query);
       return sanitize(entity);
     },
   };

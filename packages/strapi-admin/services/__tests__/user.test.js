@@ -27,10 +27,10 @@ describe('User', () => {
 
   describe('create', () => {
     const count = jest.fn(() => Promise.resolve(1));
-    const sendDidInviteUser = jest.fn();
+    // const sendDidInviteUser = jest.fn();
 
     test('Creates a user by merging given and default attributes', async () => {
-      const create = jest.fn(user => Promise.resolve(user));
+      const create = jest.fn((user) => Promise.resolve(user));
       const createToken = jest.fn(() => 'token');
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
@@ -40,7 +40,7 @@ describe('User', () => {
             token: { createToken },
             auth: { hashPassword },
             role: { count },
-            metrics: { sendDidInviteUser },
+            // metrics: { sendDidInviteUser },
           },
         },
         query() {
@@ -48,7 +48,7 @@ describe('User', () => {
         },
       };
 
-      const input = { firstname: 'John', lastname: 'Doe', email: 'johndoe@email.com' };
+      const input = { firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com' };
       const expected = { ...input, isActive: false, roles: [], registrationToken: 'token' };
 
       const result = await userService.create(input);
@@ -59,7 +59,7 @@ describe('User', () => {
     });
 
     test('Creates a user and hash password if provided', async () => {
-      const create = jest.fn(user => Promise.resolve(user));
+      const create = jest.fn((user) => Promise.resolve(user));
       const createToken = jest.fn(() => 'token');
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
@@ -69,7 +69,7 @@ describe('User', () => {
             token: { createToken },
             auth: { hashPassword },
             role: { count },
-            metrics: { sendDidInviteUser },
+            // metrics: { sendDidInviteUser },
           },
         },
         query() {
@@ -78,9 +78,9 @@ describe('User', () => {
       };
 
       const input = {
-        firstname: 'John',
+        firstname: 'Kai',
         lastname: 'Doe',
-        email: 'johndoe@email.com',
+        email: 'kaidoe@email.com',
         password: 'Pcw123',
       };
       const expected = {
@@ -101,7 +101,7 @@ describe('User', () => {
     });
 
     test('Creates a user by using given attributes', async () => {
-      const create = jest.fn(user => Promise.resolve(user));
+      const create = jest.fn((user) => Promise.resolve(user));
       const createToken = jest.fn(() => 'token');
       const hashPassword = jest.fn(() => Promise.resolve('123456789'));
 
@@ -111,7 +111,7 @@ describe('User', () => {
             token: { createToken },
             auth: { hashPassword },
             role: { count },
-            metrics: { sendDidInviteUser },
+            // metrics: { sendDidInviteUser },
           },
         },
         query() {
@@ -120,9 +120,9 @@ describe('User', () => {
       };
 
       const input = {
-        firstname: 'John',
+        firstname: 'Kai',
         lastname: 'Doe',
-        email: 'johndoe@email.com',
+        email: 'kaidoe@email.com',
         roles: [2],
         isActive: true,
         registrationToken: 'another-token',
@@ -387,7 +387,7 @@ describe('User', () => {
   });
 
   describe('Fetch user', () => {
-    const user = { firstname: 'John', lastname: 'Doe', email: 'johndoe@email.com' };
+    const user = { firstname: 'Kai', lastname: 'Doe', email: 'kaidoe@email.com' };
 
     beforeEach(() => {
       const findOne = jest.fn(({ id }) =>
@@ -493,7 +493,7 @@ describe('User', () => {
 
     test('Calls udpate service', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const updateById = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -527,7 +527,7 @@ describe('User', () => {
 
     test('Set user to active', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const updateById = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -558,7 +558,7 @@ describe('User', () => {
 
     test('Reset registrationToken', async () => {
       const findOne = jest.fn(() => Promise.resolve({ id: 1 }));
-      const updateById = jest.fn(user => Promise.resolve(user));
+      const updateById = jest.fn((user) => Promise.resolve(user));
 
       global.strapi = {
         query() {
@@ -771,7 +771,7 @@ describe('User', () => {
 
     test.each(['abc', 'Abcd', 'Abcdefgh', 'Abcd123'])(
       'Throws on invalid password',
-      async password => {
+      async (password) => {
         const email = 'email@email.fr';
 
         const findOne = jest.fn(() => ({ id: 1 }));

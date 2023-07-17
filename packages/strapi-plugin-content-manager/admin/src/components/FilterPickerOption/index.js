@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { get, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
-import { CircleButton, getFilterType } from 'strapi-helper-plugin';
+import { CircleButton, getFilterType } from '@akemona-org/strapi-helper-plugin';
 import { Select } from '@buffetjs/core';
 
 import { InputWrapper, Wrapper } from './components';
@@ -33,8 +33,8 @@ function FilterPickerOption({
   type,
 }) {
   const filtersOptions = getFilterType(type);
-  const currentFilterName = get(modifiedData, [index, 'name']);
-  const currentFilterData = allowedAttributes.find(attr => attr.name === currentFilterName);
+  const currentFilterName = get(modifiedData, [index, 'name'], '');
+  const currentFilterData = allowedAttributes.find((attr) => attr.name === currentFilterName);
   const options = get(currentFilterData, ['options'], null) || ['true', 'false'];
 
   return (
@@ -42,21 +42,21 @@ function FilterPickerOption({
       <InputWrapper>
         <CircleButton type="button" isRemoveButton onClick={() => onRemoveFilter(index)} />
         <Select
-          onChange={e => {
+          onChange={(e) => {
             // Change the attribute
             onChange(e);
             // Change the default filter so it reset to the common one which is '='
             onChange({ target: { name: `${index}.filter`, value: '=' } });
           }}
           name={`${index}.name`}
-          value={get(modifiedData, [index, 'name'], '')}
-          options={allowedAttributes.map(attr => attr.name)}
+          value={currentFilterName}
+          options={allowedAttributes.map((attr) => attr.name)}
           style={styles.select}
         />
         <Select
           onChange={onChange}
           name={`${index}.filter`}
-          options={filtersOptions.map(option => (
+          options={filtersOptions.map((option) => (
             <Option {...option} key={option.value} />
           ))}
           style={styles.selectMiddle}

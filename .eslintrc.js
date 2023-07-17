@@ -1,14 +1,14 @@
 const frontPaths = [
   'packages/**/admin/src/**/**/*.js',
-  'packages/**/ee/admin/**/**/*.js',
+  // 'packages/**/ee/admin/**/**/*.js',
   'packages/strapi-helper-plugin/**/*.js',
-  'packages/**/test/front/**/*.js',
+  'packages/**/tests/front/**/*.js',
   'test/config/front/**/*.js',
 ];
 
 module.exports = {
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 2021,
   },
   overrides: [
     {

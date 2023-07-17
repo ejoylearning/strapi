@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { translatedErrors } from 'strapi-helper-plugin';
+import { translatedErrors } from '@akemona-org/strapi-helper-plugin';
 
 const schema = yup.object().shape({
   options: yup
@@ -9,10 +9,7 @@ const schema = yup.object().shape({
         .object()
         .shape({
           name: yup.string().required(translatedErrors.required),
-          email: yup
-            .string()
-            .email(translatedErrors.email)
-            .required(translatedErrors.required),
+          email: yup.string().email(translatedErrors.email).required(translatedErrors.required),
         })
         .required(),
       response_email: yup.string().email(translatedErrors.email),

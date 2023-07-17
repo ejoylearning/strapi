@@ -1,9 +1,15 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { List, Header } from '@buffetjs/custom';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useUserPermissions, PopUpWarning, request, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  useUserPermissions,
+  PopUpWarning,
+  request,
+  useGlobalContext,
+} from '@akemona-org/strapi-helper-plugin';
 
 import permissions from '../../../permissions';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
@@ -37,7 +43,7 @@ const RoleListPage = () => {
 
   const { roles, getData, isLoading } = useRolesList(shouldFetchData);
 
-  const handleGoTo = id => {
+  const handleGoTo = (id) => {
     if (canUpdate) {
       push(`/settings/${pluginId}/roles/${id}`);
     }
@@ -60,7 +66,7 @@ const RoleListPage = () => {
           message: { id: getTrad('Settings.roles.deleted') },
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         strapi.notification.toggle({
           type: 'warning',
@@ -91,7 +97,7 @@ const RoleListPage = () => {
     ? [
         {
           label: formatMessage({
-            id: 'List.button.roles',
+            id: getTrad('List.button.roles'),
             defaultMessage: 'Add new role',
           }),
           onClick: handleNewRoleClick,
@@ -104,13 +110,13 @@ const RoleListPage = () => {
   /* eslint-enable indent */
 
   const checkCanDeleteRole = useCallback(
-    role => {
+    (role) => {
       return canDelete && !['public', 'authenticated'].includes(role.type);
     },
     [canDelete]
   );
 
-  const getLinks = role => {
+  const getLinks = (role) => {
     const links = [];
 
     if (canUpdate) {
@@ -122,7 +128,7 @@ const RoleListPage = () => {
     if (checkCanDeleteRole(role)) {
       links.push({
         icon: <FontAwesomeIcon icon="trash-alt" />,
-        onClick: e => {
+        onClick: (e) => {
           e.preventDefault();
           setModalDelete(role.id);
           e.stopPropagation();
@@ -135,22 +141,25 @@ const RoleListPage = () => {
 
   return (
     <>
+      <Helmet title={formatMessage({ id: getTrad('page.title') })} />
+
       <Header
         icon
         title={{
           label: formatMessage({
-            id: 'Settings.roles.title',
+            id: getTrad('Settings.roles.title'),
             defaultMessage: 'Roles & Permissions',
           }),
         }}
         content={formatMessage({
-          id: 'Settings.roles.list.description',
+          id: getTrad('Settings.roles.list.description'),
           defaultMessage: 'Define the roles and permissions for your users.',
         })}
         actions={headerActions}
         // Show a loader in the header while requesting data
         isLoading={isLoading || isLoadingForPermissions}
       />
+
       <BaselineAlignment />
       {canRead && (
         <RoleListWrapper>
@@ -163,7 +172,7 @@ const RoleListPage = () => {
             )}
             items={roles}
             isLoading={isLoading || isLoadingForPermissions}
-            customRowComponent={role => (
+            customRowComponent={(role) => (
               <RoleRow onClick={() => handleGoTo(role.id)} links={getLinks(role)} role={role} />
             )}
           />

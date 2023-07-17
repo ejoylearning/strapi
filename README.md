@@ -1,66 +1,12 @@
-<p align="center">
-  <a href="https://strapi.io">
-    <img src="https://strapi.io/assets/strapi-logo-dark.svg" width="318px" alt="Strapi logo" />
-  </a>
-</p>
-<h3 align="center">API creation made simple, secure and fast.</h3>
-<p align="center">The most advanced open-source headless CMS to build powerful APIs with no effort.</p>
-<br />
+### This is Strapi v3 maintenance release with focus on current LTS Node (18.x) & Latest Mongoose/MongoDB Support
 
-<p align="center">
-  <a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
-    <img src="https://assets.strapi.io/uploads/deploy_button_platform_sh_d032f646a7.png"  />
-  </a>
+## Motivation
 
-<a href="https://marketplace.digitalocean.com/apps/strapi">
-<img src="https://assets.strapi.io/uploads/deploy_button_Digital_Ocean_fe2c286222.png" />
-</a>
-
-<a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
-<img src="https://assets.strapi.io/uploads/Deploy_button_heroku_b1043fc67d.png" />
-</a>
-
-<a href="https://fastandcomfy.io/strapi/">
-<img src="https://assets.strapi.io/uploads/deploy_button_fastandcomfy_7cb9319189.png" />
-</a>
-
-</p>
-
-<p align="center">
-  <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi/latest.svg" alt="NPM Version" />
-  </a>
-  <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
-  </a>
-  <a href="https://travis-ci.org/strapi/strapi">
-    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
-  </a>
-  <a href="http://slack.strapi.io">
-    <img src="https://slack.strapi.io/badge.svg" alt="Strapi on Slack" />
-  </a>
-</p>
-
-<br>
-
-<p align="center">
-  <a href="https://strapi.io">
-    <img src="https://raw.githubusercontent.com/strapi/strapi/master/public/assets/administration_panel.png" alt="Administration panel" />
-  </a>
-</p>
-
-<br>
-
-Strapi is a free and open-source headless CMS delivering your content anywhere you need.
-
-- **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
-- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
-- **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite.
-- **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
+After strapi decided to drop MongoDB support on v4, we have decided to maintain v3 for our internal use, but anyone can use this at their own risk.
 
 ## Getting Started
 
-<a href="https://strapi.io/documentation/v3.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+Follow the steps below:
 
 ### ⏳ Installation
 
@@ -69,7 +15,7 @@ Install Strapi with this **Quickstart** command to create a Strapi project insta
 - (Use **yarn** to install the Strapi project (recommended). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
 
 ```bash
-yarn create strapi-app my-project --quickstart
+yarn create @akemona-org/strapi-app my-project --quickstart
 ```
 
 **or**
@@ -77,20 +23,27 @@ yarn create strapi-app my-project --quickstart
 - (Use npm/npx to install the Strapi project.)
 
 ```bash
-npx create-strapi-app my-project --quickstart
+npx @akemona-org/create-strapi-app my-project --quickstart
 ```
 
 This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload). The **Quickstart** command installs Strapi using a **SQLite** database which is used for prototyping in development.
 
 Enjoy 🎉
 
+### Features
+
+- **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
+- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Render, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
+- **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite. **(This custom version is only focused on MongoDB)**
+- **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
+
 ### 🖐 Requirements
 
-Complete installation requirements can be found in the documentation under <a href="https://strapi.io/documentation/v3.x/installation/cli.html#step-1-make-sure-requirements-are-met">Installation Requirements</a>.
+Complete installation requirements can be found in the documentation under <a href="https://docs-v3.strapi.io/developer-docs/latest/setup-deployment-guides/deployment.html#recommended-requirements">Installation Requirements</a>.
 
 **Supported operating systems**:
 
-- Ubuntu 18.04/Debian 9.x
+- Ubuntu LTS/Debian 9.x
 - CentOS/RHEL 8
 - macOS Mojave
 - Windows 10
@@ -100,12 +53,12 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Node:**
 
-- NodeJS >= 10.16 <=14
+- LTS versions
 - NPM >= 6.x
 
 **Database:**
 
-- MongoDB >= 3.6
+- MongoDB >= 5.0
 - MySQL >= 5.6
 - MariaDB >= 10.1
 - PostgreSQL >= 10
@@ -123,7 +76,7 @@ Complete installation requirements can be found in the documentation under <a hr
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
 - **SQL & NoSQL databases:** Works with MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite.
 
-**[See more on our website](https://strapi.io/overview)**.
+**[See more on our website](https://strapi.akemona.com/overview)**.
 
 ## Contributing
 
@@ -131,11 +84,12 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull
 
 ## Community support
 
-For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
+For general help using Strapi, please refer to [the official Strapi documentation](https://docs-v3.strapi.io/). For additional help, you can use one of these channels to ask a question:
 
-- [Slack](http://slack.strapi.io) (For live discussion with the Community and Strapi team)
+- [Discord](https://discord.strapi.io) (For live discussion with the Community and Akemona team)
 - [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
 - [Community Forum](https://forum.strapi.io) (Questions and Discussions)
+- [Academy](https://academy.strapi.io) (Learn the fundamentals of Strapi)
 - [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
 - [Twitter](https://twitter.com/strapijs) (Get the news fast)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161)
@@ -143,11 +97,14 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ## Migration
 
-Follow our [migration guides](https://strapi.io/documentation/v3.x/migration-guide/#migrations-guides) on the documentation to keep your projects up-to-date.
+Follow our [migration guides](https://docs-v3.strapi.io/documentation/developer-docs/latest/update-migration-guides/migration-guides.html) on the documentation to keep your projects up-to-date.
 
-## Roadmap
+## Documentation
 
-Check out our [roadmap](https://portal.productboard.com/strapi) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
+view our documentation live:
+
+- [Developer docs](https://docs-v3.strapi.io/developer-docs/latest/getting-started/introduction.html)
+- [User docs](https://docs-v3.strapi.io/documentation/user-docs/latest/getting-started/introduction.html)
 
 ## License
 

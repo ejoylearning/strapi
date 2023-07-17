@@ -1,8 +1,11 @@
 {
-  "name": "strapi-provider-upload-aws-s3",
-  "version": "3.3.3",
+  "name": "@akemona-org/strapi-provider-upload-aws-s3",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "3.12.4",
   "description": "AWS S3 provider for strapi upload",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.akemona.com",
   "keywords": [
     "upload",
     "aws",
@@ -14,38 +17,37 @@
   },
   "main": "./lib",
   "dependencies": {
-    "aws-sdk": "2.785.0",
-    "lodash": "4.17.19"
+    "@aws-sdk/client-s3": "3.289.0"
   },
   "strapi": {
     "isProvider": true
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "strapi@akemona.com",
+    "name": "Akemona team",
+    "url": "https://strapi.akemona.com"
   },
   "maintainers": [
     {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "name": "Akemona team",
+      "email": "strapi@akemona.com",
+      "url": "https://strapi.akemona.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/strapi/strapi.git"
+    "url": "git://github.com/akemona/strapi.git"
   },
   "bugs": {
-    "url": "https://github.com/strapi/strapi/issues"
+    "url": "https://github.com/akemona/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=14.19.1 <=18.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
     "test": "echo \"no tests yet\""
   },
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "gitHead": "57095241bb8bc011c97ecbc8c7274b674b01cd0f"
 }

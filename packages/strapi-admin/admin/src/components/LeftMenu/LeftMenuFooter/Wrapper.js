@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const Wrapper = styled.div`
   position: absolute;
   width: 100%;
-  background: ${props => props.theme.main.colors.strapi['blue-darker']};
+  background: ${(props) => props.theme.main.colors.strapi['blue-darker']};
   bottom: 0;
   .poweredBy {
     width: 100%;
@@ -19,6 +19,15 @@ const Wrapper = styled.div`
     letter-spacing: 0.05rem;
     vertical-align: middle;
     color: ${({ theme }) => theme.main.colors.strapi['gray-light']};
+  }
+`;
+
+const A = styled.a`
+  color: ${(props) => props.theme.main.colors.lightBlue};
+
+  &:hover {
+    color: ${(props) => props.theme.main.colors.mediumBlue};
+    text-decoration: underline;
   }
 `;
 
@@ -41,3 +50,4 @@ Wrapper.propTypes = {
 };
 
 export default Wrapper;
+export { A };

@@ -4,7 +4,7 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
+import { request, useGlobalContext } from '@akemona-org/strapi-helper-plugin';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormCard from '../../../components/FormBloc';
@@ -43,7 +43,7 @@ const CreatePage = () => {
       },
       {
         label: formatMessage({
-          id: getTrad('app.components.Button.save'),
+          id: 'app.components.Button.save',
           defaultMessage: 'Save',
         }),
         onClick: handleSubmit,
@@ -54,7 +54,7 @@ const CreatePage = () => {
     ];
   };
 
-  const handleCreateRoleSubmit = data => {
+  const handleCreateRoleSubmit = (data) => {
     strapi.lockAppWithOverlay();
     setIsSubmiting(true);
 
@@ -76,7 +76,7 @@ const CreatePage = () => {
         // TODO
         goBack();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         strapi.notification.toggle({
           type: 'warning',

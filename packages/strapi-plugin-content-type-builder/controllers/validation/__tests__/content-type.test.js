@@ -1,3 +1,5 @@
+'use strict';
+
 const {
   validateKind,
   validateUpdateContentTypeInput,
@@ -52,7 +54,7 @@ describe('Content type validator', () => {
         },
       };
 
-      await validateUpdateContentTypeInput(data).catch(err => {
+      await validateUpdateContentTypeInput(data).catch((err) => {
         expect(err).toMatchObject({
           'contentType.attributes.thisIsReserved': [
             expect.stringMatching('Attribute keys cannot be one of'),
@@ -75,10 +77,36 @@ describe('Content type validator', () => {
         },
       };
 
-      await validateContentTypeInput(data).catch(err => {
+      await validateContentTypeInput(data).catch((err) => {
         expect(err).toMatchObject({
           'contentType.name': [expect.stringMatching('cannot be pluralized')],
         });
+      });
+    });
+  });
+
+  describe('validateContentTypeInput', () => {
+    test('Can use custom keys', async () => {
+      const input = {
+        contentType: {
+          name: 'test',
+          attributes: {
+            views: {
+              type: 'integer',
+              myCustomKey: 10000,
+            },
+            title: {
+              type: 'string',
+              myCustomKey: true,
+            },
+          },
+        },
+      };
+
+      expect.assertions(1);
+
+      await validateContentTypeInput(input).then((data) => {
+        expect(data.contentType.attributes).toBe(input.contentType.attributes);
       });
     });
   });
@@ -147,6 +175,30 @@ describe('Content type validator', () => {
 
       await validateUpdateContentTypeInput(data).then(() => {
         expect(data.contentType.attributes.slug.targetField).toBeUndefined();
+      });
+    });
+
+    test('Can use custom keys', async () => {
+      const input = {
+        contentType: {
+          name: 'test',
+          attributes: {
+            views: {
+              type: 'integer',
+              myCustomKey: 10000,
+            },
+            title: {
+              type: 'string',
+              myCustomKey: true,
+            },
+          },
+        },
+      };
+
+      expect.assertions(1);
+
+      await validateUpdateContentTypeInput(input).then((data) => {
+        expect(data.contentType.attributes).toBe(input.contentType.attributes);
       });
     });
   });

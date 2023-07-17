@@ -15,18 +15,18 @@ function StaticLinks() {
     {
       icon: 'book',
       label: formatMessage({ id: 'app.components.LeftMenuFooter.documentation' }),
-      destination: 'https://strapi.io/documentation',
+      destination: 'https://strapi.akemona.com/documentation',
     },
     {
       icon: 'file',
       label: formatMessage({ id: 'app.static.links.cheatsheet' }),
       destination: 'https://strapi-showcase.s3-us-west-2.amazonaws.com/CheatSheet.pdf',
-    }
+    },
   ];
 
   return (
     <ul className="list">
-      {staticLinks.map(link => {
+      {staticLinks.map((link) => {
         const { icon, label, destination } = link;
 
         return (

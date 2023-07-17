@@ -17,10 +17,11 @@ import {
   PopUpWarning,
   useUserPermissions,
   LoadingIndicatorPage,
-} from 'strapi-helper-plugin';
+  EmptyState,
+} from '@akemona-org/strapi-helper-plugin';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
-import { EmptyList, ListRow } from '../../../components/Webhooks';
+import { ListRow } from '../../../components/Webhooks';
 import Wrapper from './Wrapper';
 import reducer, { initialState } from './reducer';
 
@@ -53,7 +54,7 @@ function ListView() {
     }
   }, [canRead]);
 
-  const getWebhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
+  const getWebhookIndex = (id) => webhooks.findIndex((webhook) => webhook.id === id);
 
   // New button
   const addBtnLabel = formatMessage({
@@ -66,7 +67,7 @@ function ListView() {
     color: 'primary',
     type: 'button',
     icon: <Plus fill="#007eff" width="11px" height="11px" />,
-    Component: props => {
+    Component: (props) => {
       if (canCreate) {
         return <Button {...props} />;
       }
@@ -212,7 +213,7 @@ function ListView() {
     setShowModal(false);
   };
 
-  const handleDeleteClick = id => {
+  const handleDeleteClick = (id) => {
     setShowModal(true);
 
     dispatch({
@@ -263,7 +264,7 @@ function ListView() {
     }
   };
 
-  const handleGoTo = to => {
+  const handleGoTo = (to) => {
     push(`${pathname}/${to}`);
   };
 
@@ -280,7 +281,7 @@ function ListView() {
           {rowsCount > 0 ? (
             <List
               {...listProps}
-              customRowComponent={props => {
+              customRowComponent={(props) => {
                 return (
                   <ListRow
                     {...props}
@@ -296,7 +297,12 @@ function ListView() {
               }}
             />
           ) : (
-            <EmptyList />
+            <EmptyState
+              title={formatMessage({ id: 'Settings.webhooks.list.empty.title' })}
+              description={formatMessage({ id: 'Settings.webhooks.list.empty.description' })}
+              link="https://strapi.akemona.com/documentation/developer-docs/latest/development/backend-customization.html#webhooks"
+              linkText={formatMessage({ id: 'Settings.webhooks.list.empty.link' })}
+            />
           )}
           <ListButton>{canCreate && <Button {...omit(newButtonProps, 'Component')} />}</ListButton>
         </div>

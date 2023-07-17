@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@akemona-org/strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import init from './init';
@@ -22,8 +22,8 @@ const usePlugins = (shouldFetchData = true) => {
       });
 
       const [{ permissions }, { routes }, { policies }] = await Promise.all(
-        [`/${pluginId}/permissions`, `/${pluginId}/routes`, `/${pluginId}/policies`].map(endpoint =>
-          request(endpoint, { method: 'GET' })
+        [`/${pluginId}/permissions`, `/${pluginId}/routes`, `/${pluginId}/policies`].map(
+          (endpoint) => request(endpoint, { method: 'GET' })
         )
       );
 

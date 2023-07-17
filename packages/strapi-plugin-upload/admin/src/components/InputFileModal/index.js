@@ -1,7 +1,7 @@
 import React, { createRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@akemona-org/strapi-helper-plugin';
 import { getTrad } from '../../utils';
 import Cloud from '../../icons/Cloud';
 import Label from './Label';
@@ -13,7 +13,7 @@ const InputFileModal = ({ name, onChange }) => {
   const { formatMessage } = useGlobalContext();
   const ref = createRef();
 
-  const handleAllowDrop = e => e.preventDefault();
+  const handleAllowDrop = (e) => e.preventDefault();
 
   const handleChange = ({ target: { files } }) => {
     onChange({ target: { name, value: files } });
@@ -31,7 +31,7 @@ const InputFileModal = ({ name, onChange }) => {
     setIsDragging(false);
   };
 
-  const handleDrop = e => {
+  const handleDrop = (e) => {
     e.preventDefault();
 
     setIsDragging(false);
@@ -47,7 +47,7 @@ const InputFileModal = ({ name, onChange }) => {
       onDrop={handleDrop}
     >
       <Cloud />
-      <P>
+      <P isDragging={isDragging}>
         <span className="bold">{formatMessage({ id: getTrad('input.label-bold') })}&nbsp;</span>
         <span>{formatMessage({ id: getTrad('input.label-normal') })}</span>
       </P>

@@ -1,16 +1,22 @@
 'use strict';
 
 const _ = require('lodash');
-var semver = require('semver');
-const utils = require('./utils')();
-const populateQueries = require('./utils/populate-queries');
+const { isNil, isEmpty, set, omit, assoc } = require('lodash/fp');
+const semver = require('semver');
 const {
   hasDeepFilters,
   contentTypes: {
     constants: { DP_PUB_STATES },
     hasDraftAndPublish,
   },
-} = require('strapi-utils');
+} = require('@akemona-org/strapi-utils');
+const utils = require('./utils')();
+const populateQueries = require('./utils/populate-queries');
+
+const sortOrderMapper = {
+  asc: 1,
+  desc: -1,
+};
 
 const combineSearchAndWhere = (search = [], wheres = []) => {
   const criterias = {};
@@ -30,6 +36,9 @@ const buildSearchOr = (model, query) => {
   }
 
   const searchOr = Object.keys(model.attributes).reduce((acc, curr) => {
+    if (model.attributes[curr].searchable === false) {
+      return acc;
+    }
     switch (model.attributes[curr].type) {
       case 'biginteger':
       case 'integer':
@@ -86,14 +95,15 @@ const buildQuery = ({
   searchParam,
   populate = [],
   aggregate = false,
+  session = null,
 } = {}) => {
   const search = buildSearchOr(model, searchParam);
 
-  if (!hasDeepFilters(filters.where) && aggregate === false) {
-    return buildSimpleQuery({ model, filters, search, populate });
+  if (!hasDeepFilters(filters) && aggregate === false) {
+    return buildSimpleQuery({ model, filters, search, populate }, { session });
   }
 
-  return buildDeepQuery({ model, filters, populate, search });
+  return buildDeepQuery({ model, filters, populate, search }, { session });
 };
 
 /**
@@ -104,15 +114,18 @@ const buildQuery = ({
  * @param {Object} options.search - An object with the possible search params
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildSimpleQuery = ({ model, filters, search, populate }) => {
+const buildSimpleQuery = ({ model, filters, search, populate }, { session }) => {
   const { where = [] } = filters;
 
   const wheres = where.map(buildWhereClause);
 
   const findCriteria = combineSearchAndWhere(search, wheres);
+
   let query = model
     .find(findCriteria, null, { publicationState: filters.publicationState })
+    .session(session)
     .populate(populate);
+
   query = applyQueryParams({ model, query, filters });
 
   return Object.assign(query, {
@@ -130,7 +143,7 @@ const buildSimpleQuery = ({ model, filters, search, populate }) => {
  * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
-const buildDeepQuery = ({ model, filters, search, populate }) => {
+const buildDeepQuery = ({ model, filters, search, populate }, { session }) => {
   // Build a tree of paths to populate based on the filtering and the populate option
   const { populatePaths, wherePaths } = computePopulatedPaths({
     model,
@@ -138,14 +151,17 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
     where: filters.where,
   });
 
+  const aggregateOptions = {
+    paths: _.merge({}, populatePaths, wherePaths),
+  };
+
   // Init the query
   let query = model
-    .aggregate(
-      buildQueryAggregate(model, filters, {
-        paths: _.merge({}, populatePaths, wherePaths),
-      })
-    )
-    .append(buildQueryMatches(model, filters, search));
+    .aggregate(buildQueryAggregate(model, filters, aggregateOptions))
+    .session(session)
+    .append(buildQueryMatches(model, filters, search))
+    .append(buildQuerySort(model, filters))
+    .append(buildQueryPagination(model, filters));
 
   return {
     /**
@@ -153,36 +169,35 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
      */
     then(...args) {
       return query
-        .append({
-          $project: { _id: true },
-        })
-        .then(results => results.map(el => el._id))
-        .then(ids => {
+        .append({ $project: { _id: true } })
+        .then((results) => results.map((el) => el._id))
+        .then((ids) => {
           if (ids.length === 0) return [];
 
-          const query = model
-            .find(
-              {
-                _id: {
-                  $in: ids,
-                },
-              },
-              null
-            )
-            .populate(populate);
+          const idsMap = ids.reduce((acc, id, idx) => assoc(id, idx, acc), {});
 
-          return applyQueryParams({ model, query, filters });
+          const mongooseQuery = model
+            .find({ _id: { $in: ids } }, null)
+            .session(session)
+            .populate(populate);
+          const query = applyQueryParams({
+            model,
+            query: mongooseQuery,
+            filters: omit(['sort', 'start', 'limit'], filters),
+          });
+
+          return query.then(orderByIndexMap(idsMap));
         })
         .then(...args);
     },
     catch(...args) {
-      return this.then(r => r).catch(...args);
+      return this.then((r) => r).catch(...args);
     },
     /**
      * Maps to query.count
      */
     count() {
-      return query.count('count').then(results => _.get(results, ['0', 'count'], 0));
+      return query.count('count').then((results) => _.get(results, ['0', 'count'], 0));
     },
 
     /**
@@ -196,8 +211,8 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
      */
     lean() {
       // Returns plain js objects without the transformations we normally do on find
-      return this.then(results => {
-        return results.map(r => r.toObject({ transform: false }));
+      return this.then((results) => {
+        return results.map((r) => r.toObject({ transform: false }));
       });
     },
   };
@@ -210,11 +225,10 @@ const buildDeepQuery = ({ model, filters, search, populate }) => {
  * @param {Object} options.filters - Filters object
  */
 const applyQueryParams = ({ model, query, filters }) => {
-  // Apply sort param
   if (_.has(filters, 'sort')) {
     const sortFilter = filters.sort.reduce((acc, sort) => {
       const { field, order } = sort;
-      acc[field] = order === 'asc' ? 1 : -1;
+      acc[field] = sortOrderMapper[order];
       return acc;
     }, {});
 
@@ -252,17 +266,17 @@ const applyQueryParams = ({ model, query, filters }) => {
  */
 const computePopulatedPaths = ({ model, populate = [], where = [] }) => {
   const castedPopulatePaths = populate
-    .map(el => (Array.isArray(el) ? el.join('.') : el))
-    .map(path => findModelPath({ rootModel: model, path }))
-    .map(path => {
+    .map((el) => (Array.isArray(el) ? el.join('.') : el))
+    .map((path) => findModelPath({ rootModel: model, path }))
+    .map((path) => {
       const assocModel = findModelByPath({ rootModel: model, path });
 
       // autoload morph relations
       let extraPaths = [];
       if (assocModel) {
         extraPaths = assocModel.associations
-          .filter(assoc => assoc.nature.toLowerCase().indexOf('morph') !== -1)
-          .map(assoc => `${path}.${assoc.alias}`);
+          .filter((assoc) => assoc.nature.toLowerCase().indexOf('morph') !== -1)
+          .map((assoc) => `${path}.${assoc.alias}`);
       }
 
       return [path, ...extraPaths];
@@ -280,13 +294,13 @@ const computePopulatedPaths = ({ model, populate = [], where = [] }) => {
 const recursiveCastedWherePaths = (whereClauses, { model }) => {
   const paths = whereClauses.map(({ field, operator, value }) => {
     if (BOOLEAN_OPERATORS.includes(operator)) {
-      return value.map(where => recursiveCastedWherePaths(where, { model }));
+      return value.map((where) => recursiveCastedWherePaths(where, { model }));
     }
 
     return findModelPath({ rootModel: model, path: field });
   });
 
-  return _.flattenDeep(paths).filter(path => !!path);
+  return _.flattenDeep(paths).filter((path) => !!path);
 };
 
 /**
@@ -305,7 +319,7 @@ const recursiveCastedWherePaths = (whereClauses, { model }) => {
  * }
  * @param {Array<string>} paths - A list of paths to transform
  */
-const pathsToTree = paths => paths.reduce((acc, path) => _.merge(acc, _.set({}, path, {})), {});
+const pathsToTree = (paths) => paths.reduce((acc, path) => _.merge(acc, _.set({}, path, {})), {});
 
 /**
  * Builds the aggregations pipeline of the query
@@ -328,7 +342,7 @@ const buildQueryAggregate = (model, filters, { paths } = {}) => {
  * @param {Object} options.paths - A tree of paths to aggregate inside the current lookup e.g { { tags : { label: {}}}
  */
 const buildLookup = ({ model, key, paths, filters }) => {
-  const assoc = model.associations.find(a => a.alias === key);
+  const assoc = model.associations.find((a) => a.alias === key);
   const assocModel = strapi.db.getModelByAssoc(assoc);
 
   if (!assocModel) return [];
@@ -408,7 +422,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
         $match: {
           $and: defaultMatches.concat({
             $expr: {
-              $in: ['$_id', '$$localAlias'],
+              $in: ['$_id', { $ifNull: ['$$localAlias', []] }],
             },
           }),
         },
@@ -420,7 +434,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
           $match: {
             $and: defaultMatches.concat({
               $expr: {
-                $in: ['$_id', '$$localAlias'],
+                $in: ['$_id', { $ifNull: ['$$localAlias', []] }],
               },
             }),
           },
@@ -431,7 +445,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
         $match: {
           $and: defaultMatches.concat({
             $expr: {
-              $in: ['$$localId', `$${assoc.via}`],
+              $in: ['$$localId', { $ifNull: [`$${assoc.via}`, []] }],
             },
           }),
         },
@@ -470,7 +484,7 @@ const buildLookupMatch = ({ assoc, assocModel, filters = {} }) => {
  */
 const buildQueryMatches = (model, filters, search = []) => {
   if (_.has(filters, 'where') && Array.isArray(filters.where)) {
-    const wheres = filters.where.map(whereClause => {
+    const wheres = filters.where.map((whereClause) => {
       return buildWhereClause(formatWhereClause(model, whereClause));
     });
 
@@ -483,10 +497,52 @@ const buildQueryMatches = (model, filters, search = []) => {
 };
 
 /**
+ * Sort query for the aggregate
+ * @param {Object} model - Mongoose model
+ * @param {Object} filters - Filters object
+ */
+const buildQuerySort = (model, filters) => {
+  const { sort } = filters;
+
+  if (Array.isArray(sort) && !isEmpty(sort)) {
+    return [
+      {
+        $sort: sort.reduce(
+          (acc, { field, order }) => set([field], sortOrderMapper[order], acc),
+          {}
+        ),
+      },
+    ];
+  }
+
+  return [];
+};
+
+/**
+ * Add pagination operators for the aggregate
+ * @param {Object} model - Mongoose model
+ * @param {Object} filters - Filters object
+ */
+const buildQueryPagination = (model, filters) => {
+  const { limit, start } = filters;
+  const pagination = [];
+
+  if (start && start >= 0) {
+    pagination.push({ $skip: start });
+  }
+
+  if (limit && limit >= 0) {
+    pagination.push({ $limit: limit });
+  }
+
+  return pagination;
+};
+
+/**
  * Cast values
  * @param {*} value - Value to cast
  */
-const formatValue = value => utils.valueToId(value);
+const formatValue = (value) => utils.valueToId(value);
 
 /**
  * Builds a where clause
@@ -498,7 +554,7 @@ const formatValue = value => utils.valueToId(value);
 const buildWhereClause = ({ field, operator, value }) => {
   if (Array.isArray(value) && !['or', 'in', 'nin'].includes(operator)) {
     return {
-      $or: value.map(val => buildWhereClause({ field, operator, value: val })),
+      $or: value.map((val) => buildWhereClause({ field, operator, value: val })),
     };
   }
 
@@ -507,7 +563,7 @@ const buildWhereClause = ({ field, operator, value }) => {
   switch (operator) {
     case 'or': {
       return {
-        $or: value.map(orClause => {
+        $or: value.map((orClause) => {
           if (Array.isArray(orClause)) {
             return {
               $and: orClause.map(buildWhereClause),
@@ -545,7 +601,7 @@ const buildWhereClause = ({ field, operator, value }) => {
     case 'contains': {
       return {
         [field]: {
-          $regex: `${val}`,
+          $regex: _.escapeRegExp(`${val}`),
           $options: 'i',
         },
       };
@@ -559,7 +615,7 @@ const buildWhereClause = ({ field, operator, value }) => {
     case 'containss':
       return {
         [field]: {
-          $regex: `${val}`,
+          $regex: _.escapeRegExp(`${val}`),
         },
       };
     case 'ncontainss':
@@ -590,7 +646,7 @@ const formatWhereClause = (model, { field, operator, value }) => {
     return {
       field,
       operator,
-      value: value.map(v => v.map(whereClause => formatWhereClause(model, whereClause))),
+      value: value.map((v) => v.map((whereClause) => formatWhereClause(model, whereClause))),
     };
   }
 
@@ -621,7 +677,7 @@ const getAssociationFromFieldKey = (model, fieldKey) => {
   const parts = fieldKey.split('.');
 
   for (let key of parts) {
-    assoc = tmpModel.associations.find(ast => ast.alias === key);
+    assoc = tmpModel.associations.find((ast) => ast.alias === key);
     if (assoc) {
       tmpModel = strapi.db.getModelByAssoc(assoc);
     }
@@ -644,7 +700,7 @@ const findModelByPath = ({ rootModel, path }) => {
 
   let tmpModel = rootModel;
   for (let part of parts) {
-    const assoc = tmpModel.associations.find(ast => ast.alias === part);
+    const assoc = tmpModel.associations.find((ast) => ast.alias === part);
     if (assoc) {
       tmpModel = strapi.db.getModelByAssoc(assoc);
     }
@@ -657,7 +713,7 @@ const findModelByPath = ({ rootModel, path }) => {
  * Returns a model path from an attribute path and a root model
  * @param {Object} options - Options
  * @param {Object} options.rootModel - Mongoose model
- * @param {string} options.path - Attribute path
+ * @param {string|Object} options.path - Attribute path
  */
 const findModelPath = ({ rootModel, path }) => {
   const parts = (_.isObject(path) ? path.path : path).split('.');
@@ -665,7 +721,7 @@ const findModelPath = ({ rootModel, path }) => {
   let tmpModel = rootModel;
   let tmpPath = [];
   for (let part of parts) {
-    const assoc = tmpModel.associations.find(ast => ast.alias === part);
+    const assoc = tmpModel.associations.find((ast) => ast.alias === part);
 
     if (assoc) {
       tmpModel = strapi.db.getModelByAssoc(assoc);
@@ -674,6 +730,19 @@ const findModelPath = ({ rootModel, path }) => {
   }
 
   return tmpPath.length > 0 ? tmpPath.join('.') : null;
+};
+
+/**
+ * Order a list of entities based on an indexMap
+ * @param {Object} indexMap - index map of the form { [id]: index }
+ */
+const orderByIndexMap = (indexMap) => (entities) => {
+  return entities
+    .reduce((acc, entry) => {
+      acc[indexMap[entry._id]] = entry;
+      return acc;
+    }, [])
+    .filter((entity) => !isNil(entity));
 };
 
 module.exports = buildQuery;
